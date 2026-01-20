@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Карта RDR2</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      height: 100vh;
+      width: 100vw;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+  // Створення карти
+  const map = L.map('map', {
+    crs: L.CRS.Simple,
+    minZoom: -2
+  });
+
+  // Межі карти
+  const bounds = [[0, 0], [8192, 8192]];
+
+  // Фонова карта
+  L.imageOverlay(
+    'https://i.imgur.com/3ZQ3ZQp.jpg',
+    bounds
+  ).addTo(map);
+
+  map.fitBounds(bounds);
+
+  // Іконка повозки
+  const iconWagon = L.icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/743/743922.png',
+    iconSize: [32, 32]
+  });
+
+  // Повозка на карті
+  L.marker([4000, 4000], { icon: iconWagon })
+    .addTo(map)
+    .bindPopup("Повозка<br>Ціна: 100$");
+
+  // Клік по карті (для визначення координат)
+  map.on('click', function(e) {
+    alert("Координати: " + e.latlng.lat + ", " + e.latlng.lng);
+  });
+</script>
+
+</body>
+</html>
