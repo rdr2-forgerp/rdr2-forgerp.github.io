@@ -26,37 +26,40 @@
 <div id="map"></div>
 
 <script>
-  // Створення карти
-  const map = L.map('map', {
-    crs: L.CRS.Simple,
-    minZoom: -2
-  });
+  // 1. Створюємо карту
+  const map = L.map('map').setView([10, 10], 2);
 
-  // Межі карти
-  const bounds = [[0,0],[8192,8192]];
+  // 2. Підключаємо тайли карти RDR2
+  const tileLayer = L.tileLayer(
+    'https://rdr2map.com/tiles/{z}/{x}/{y}.png',
+    {
+      minZoom: 1,
+      maxZoom: 6,
+      noWrap: true
+    }
+  );
+  tileLayer.addTo(map);
 
-  // Фонова карта
-  L.imageOverlay(
-    'https://raw.githubusercontent.com/Maps-RDR2/rdr2-map/main/map.jpg',
-    bounds
-  ).addTo(map);
-
-  map.fitBounds(bounds);
-
-  // Іконка повозки
+  // 3. Іконка повозки
   const wagonIcon = L.icon({
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/743/743922.png',
     iconSize: [32, 32]
   });
 
-  // Повозка
-  L.marker([4000, 4000], { icon: wagonIcon })
-    .addTo(map)
-    .bindPopup("Повозка<br>Ціна: 100$");
+  // 4. Функція додавання повозки
+  function addWagon(lat, lng, price, title) {
+    L.marker([lat, lng], { icon: wagonIcon })
+      .addTo(map)
+      .bindPopup(`<b>${title}</b><br>Ціна: ${price}$`);
+  }
 
-  // Клік по карті (координати)
+  // 5. Приклади повозок
+  addWagon(10, 10, 100, "Повозка #1");
+  addWagon(12, 15, 250, "Повозка #2");
+
+  // 6. Показ координат по кліку
   map.on('click', function(e) {
-    alert("Координати: " + e.latlng.lat + ", " + e.latlng.lng);
+    alert(`Координати: ${e.latlng.lat}, ${e.latlng.lng}`);
   });
 </script>
 
