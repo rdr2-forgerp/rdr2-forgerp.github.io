@@ -10,15 +10,16 @@
 
   <style>
     body { 
-        margin:0;
-  background:#D2B791;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+      margin:0;
+      background:#D2B791;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
 
     #map{
-  position: relative;
-  height:100vh;
-  width:100vw;
-  background: #D2B791;
+      position: relative;
+      height:100vh;
+      width:100vw;
+      background: #D2B791;
     }
 
     /* віньєтка */
@@ -206,28 +207,28 @@
     .stat .value{ font-size: 18px; font-weight: 900; letter-spacing: .2px; }
 
     .priceRow{
-  display:flex;
-  align-items:baseline;
-  justify-content:flex-start;
-  gap: 10px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255,255,255,.10);
-}
-
-.priceLabel{
-  font-size: 14px;
-  opacity: .90;
-  font-weight: 900;
-  color: #f3e6cf;
-}
-
-.priceValue{
-  font-size: 28px;
-  font-weight: 1000;
-  letter-spacing: .4px;
-  color: #ffe6b2;
-  text-shadow: 0 10px 22px rgba(0,0,0,.35);
+      display:flex;
+      align-items:baseline;
+      justify-content:flex-start;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,.10);
     }
+
+    .priceLabel{
+      font-size: 14px;
+      opacity: .90;
+      font-weight: 900;
+      color: #f3e6cf;
+    }
+
+    .priceValue{
+      font-size: 28px;
+      font-weight: 1000;
+      letter-spacing: .4px;
+      color: #ffe6b2;
+      text-shadow: 0 10px 22px rgba(0,0,0,.35);
+    } /* ✅ закрив дужку */
 
     @media (max-width: 620px){
       .rdrCard { width: 92vw; }
@@ -262,12 +263,6 @@
     location.reload();
   };
 
-  // ==========================================================
-  // ✅ ТУТ ТИ МІНЯЄШ ДАНІ ПОВОЗОК
-  // title = що показуємо (наприклад "Возик")
-  // code  = код/назва фото (W1..W15)
-  // photos = ["W1.jpg"] і т.д.
-  // ==========================================================
   const WAGONS_DATA = [
     { id: 1,  title: "Возик", code: "W1",  price: 3100, deliveriesToBuy: 20, passengers: 2, slots: 0, kg: 0, photos: ["W1.jpg"],  x: 1874, y: 747 },
     { id: 2,  title: "Возик", code: "W2",  price: 0,    deliveriesToBuy: 0,  passengers: 0, slots: 0, kg: 0, photos: ["W2.jpg"],  x: null, y: null },
@@ -289,8 +284,18 @@
   // helpers
   const num = (n) => (Number.isFinite(Number(n)) ? Number(n) : 0);
   const fmtInt = (n) => String(Math.round(num(n)));
-  const fmtPrice = (n) => num(n).toLocaleString('uk-UA');
-  const esc = (s) => String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+
+  // ✅ ЦІНА 3.100 (крапка як роздільник тисяч)
+  function fmtPriceDot(n){
+    const s = Math.round(num(n)).toString();
+    return s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  const esc = (s) => String(s ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
 
   function resolveUrl(u){
     const s = String(u || "").trim();
@@ -320,6 +325,7 @@
 
           ${photos.length>1 ? `<button class="navBtn navLeft" data-action="prev">‹</button>` : ``}
           ${photos.length>1 ? `<button class="navBtn navRight" data-action="next">›</button>` : ``}
+
           ${photos.length>1 ? renderDots(photos.length, idx) : ``}
         </div>
 
@@ -338,10 +344,10 @@
             <div class="stat"><div class="label">Потрібно доставок для купівлі</div><div class="value">${fmtInt(w.deliveriesToBuy)}</div></div>
           </div>
 
-<div class="priceRow">
-  <span class="priceLabel">Ціна</span>
-  <span class="priceValue">${fmtPriceDot(w.price)} $</span>
-</div>
+          <div class="priceRow">
+            <span class="priceLabel">Ціна</span>
+            <span class="priceValue">${fmtPriceDot(w.price)} $</span>
+          </div>
         </div>
       </div>
     `;
@@ -363,7 +369,6 @@
   preload.src = MAP_URL;
 
   function initMap(MAP_WIDTH, MAP_HEIGHT){
-    // ✅ ключовий фікс: вимикаємо zoom/fade анімації -> попап не скейлиться
     const map = L.map('map', {
       crs: L.CRS.Simple,
       minZoom: -2,
@@ -379,7 +384,6 @@
     map.fitBounds(bounds);
     map.setMaxBounds(bounds);
 
-    // зливаємо: дані з коду + позиції зі збереження
     const saved = loadState();
     const savedById = new Map((saved?.wagons || []).map(w => [w.id, w]));
 
@@ -434,7 +438,6 @@
         w.y = ll.lat;
         w.x = ll.lng;
 
-        // зберігаємо тільки позиції
         const toSave = wagons.map(x => ({ id: x.id, x: x.x, y: x.y }));
         saveState({ wagons: toSave });
       });
