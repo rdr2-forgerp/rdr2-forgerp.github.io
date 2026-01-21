@@ -3,9 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RDR2 — Повозки</title>
+  <title>RDR2 — Мітки</title>
 
-  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -13,10 +12,50 @@
     body { margin:0; background:#000; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
     #map { height:100vh; width:100vw; background:#000; }
 
+    /* Приховати стандартні контролли, якщо хочеш кастомні */
+    /* .leaflet-control-zoom { display:none; } */
+
     /* Popup shell */
     .leaflet-popup-content-wrapper { background: transparent; box-shadow:none; }
     .leaflet-popup-content { margin: 0; }
     .leaflet-popup-tip { background: rgba(40,28,16,.92); }
+
+    /* Marker badge (як на твоєму прикладі) */
+    .pinWrap{
+      position: relative;
+      width: 44px; height: 44px;
+      transform: translate(-50%, -100%);
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.45));
+      user-select: none;
+    }
+    .pinBadge{
+      position:absolute;
+      top:-10px; left: 50%;
+      transform: translateX(-50%);
+      padding: 3px 7px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 12px;
+      color: #f3e6cf;
+      background: rgba(35,24,14,.92);
+      border: 1px solid rgba(255,255,255,.14);
+      white-space: nowrap;
+    }
+    .pinIcon{
+      position:absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: rgba(35,24,14,.92);
+      border: 1px solid rgba(255,255,255,.14);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+    .pinIcon img{
+      width: 26px; height: 26px;
+      display:block;
+    }
 
     /* RDR2-like card */
     .rdrCard {
@@ -30,90 +69,54 @@
       backdrop-filter: blur(2px);
     }
 
-    .rdrTop {
-      position: relative;
-      height: 290px;
-      background: #1a110a;
-    }
+    .rdrTop { position: relative; height: 290px; background: #1a110a; }
+    .rdrImg { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(.95) contrast(1.05); }
 
-    .rdrImg {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      filter: saturate(.95) contrast(1.05);
-    }
-
-    .rdrClose {
-      position:absolute;
-      top: 12px;
-      right: 12px;
-      width: 34px;
-      height: 34px;
-      border: 0;
-      border-radius: 10px;
+    .rdrClose{
+      position:absolute; top: 12px; right: 12px;
+      width: 34px; height: 34px;
+      border: 0; border-radius: 10px;
       cursor: pointer;
       color: #fff;
       background: rgba(0,0,0,.35);
-      font-size: 20px;
-      line-height: 34px;
+      font-size: 20px; line-height: 34px;
     }
     .rdrClose:hover { background: rgba(0,0,0,.55); }
 
-    .navBtn {
-      position:absolute;
-      top: 50%;
+    .navBtn{
+      position:absolute; top:50%;
       transform: translateY(-50%);
-      width: 48px;
-      height: 48px;
-      border: 0;
-      border-radius: 999px;
+      width: 48px; height: 48px;
+      border: 0; border-radius: 999px;
       cursor: pointer;
-      color: #fff;
+      color:#fff;
       background: rgba(0,0,0,.35);
-      font-size: 24px;
-      line-height: 48px;
+      font-size: 24px; line-height: 48px;
     }
-    .navBtn:hover { background: rgba(0,0,0,.55); }
-    .navLeft { left: 14px; }
-    .navRight { right: 14px; }
+    .navBtn:hover{ background: rgba(0,0,0,.55); }
+    .navLeft{ left: 14px; }
+    .navRight{ right: 14px; }
 
-    .dotsWrap {
+    .dotsWrap{
       position:absolute;
-      bottom: 12px;
-      left: 50%;
+      bottom: 12px; left: 50%;
       transform: translateX(-50%);
-      display:flex;
-      gap: 6px;
+      display:flex; gap: 6px;
       padding: 8px 10px;
       border-radius: 999px;
       background: rgba(0,0,0,.25);
     }
-    .dot {
-      width: 8px; height: 8px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.35);
-    }
-    .dot.active { background: rgba(255,255,255,.9); }
+    .dot{ width: 8px; height: 8px; border-radius:999px; background: rgba(255,255,255,.35); }
+    .dot.active{ background: rgba(255,255,255,.9); }
 
-    .rdrBody {
+    .rdrBody{
       padding: 14px 16px 18px;
       background: linear-gradient(to bottom, rgba(45,30,18,.92), rgba(30,20,12,.92));
     }
 
-    .titleRow {
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .titleRow .name {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: .2px;
-    }
-    .titleRow .idPill {
+    .titleRow{ display:flex; align-items:flex-end; justify-content:space-between; gap: 10px; margin-bottom: 10px; }
+    .titleRow .name{ font-size: 22px; font-weight: 900; letter-spacing: .2px; }
+    .titleRow .idPill{
       padding: 8px 12px;
       border-radius: 999px;
       background: rgba(255,255,255,.08);
@@ -123,71 +126,33 @@
       white-space: nowrap;
     }
 
-    .grid {
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .field {
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 14px;
-      padding: 10px;
-    }
-    .field label {
-      display:block;
-      font-size: 12px;
-      opacity: .85;
-      margin-bottom: 6px;
-    }
-    .field input, .field textarea {
-      width: 100%;
-      box-sizing: border-box;
-      background: rgba(0,0,0,.25);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 10px;
-      padding: 10px 10px;
-      color: #f3e6cf;
-      outline: none;
-      font-size: 14px;
-    }
-    .field textarea { resize: vertical; min-height: 68px; }
-
-    .rowFull { grid-column: 1 / -1; }
-
-    .actions {
-      margin-top: 12px;
+    .metaRow{
       display:flex;
       gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .btn {
-      border: 0;
-      border-radius: 14px;
-      padding: 10px 12px;
-      cursor: pointer;
+      align-items:center;
+      opacity: .95;
       font-weight: 800;
-      background: rgba(255,255,255,.10);
-      color: #f3e6cf;
-      border: 1px solid rgba(255,255,255,.14);
     }
-    .btn:hover { background: rgba(255,255,255,.16); }
-
-    .hint {
-      font-size: 12px;
-      opacity: .85;
-      line-height: 1.25;
+    .pricePill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.20);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .coin{
+      width: 18px; height: 18px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.7), rgba(255,255,255,0) 55%),
+                  rgba(255, 196, 73, .95);
+      box-shadow: 0 0 0 2px rgba(0,0,0,.22) inset;
     }
 
-    /* responsive */
     @media (max-width: 620px){
       .rdrCard { width: 92vw; }
       .rdrTop { height: 220px; }
-      .grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -195,83 +160,42 @@
 <div id="map"></div>
 
 <script>
-  // =========================
-  // 1) РОЗМІР КАРТИНКИ map.jpg
-  // =========================
-  // Якщо карта не повністю влазить/розтягується — скажи розмір map.jpg і я підкажу точні числа.
-  const MAP_WIDTH  = 2200;
-  const MAP_HEIGHT = 1712;
-
-  // =========================
-  // 2) MAP INIT
-  // =========================
-  const map = L.map('map', { crs: L.CRS.Simple, minZoom: -2, maxZoom: 2 });
-  const bounds = [[0,0],[MAP_HEIGHT, MAP_WIDTH]];
-  L.imageOverlay('map.jpg', bounds).addTo(map);
-  map.fitBounds(bounds);
-  map.setMaxBounds(bounds);
-
-  // =========================
-  // 3) ICON (твій wagon.jpg)
-  // =========================
-  const wagonIcon = L.icon({
-    iconUrl: 'wagon.jpg',
-    iconSize: [44, 44],
-    iconAnchor: [22, 44],
-    popupAnchor: [0, -38]
-  });
-
-  // =========================
-  // 4) STORAGE (збереження позицій/даних)
-  // =========================
-  const STORAGE_KEY = "rdr2_wagons_v1";
+  const STORAGE_KEY = "rdr2_pins_v1";
 
   function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch(e) {
-      return null;
-    }
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); }
+    catch(e){ return null; }
   }
   function saveState(state) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
-  // =========================
-  // 5) 15 ПОВОЗОК (дефолт)
-  // =========================
-  const defaultWagons = Array.from({length: 15}, (_, i) => {
-    const id = i + 1;
-    return {
-      id,
-      name: `Повозка #${id}`,
-      price: 100 + id * 10,          // ціна
-      weight: 200 + id * 5,          // вага
-      seats: 2,                      // місця
-      deliveries: 0,                 // кількість доставок
-      needToBuy: "Гроші + документ", // що потрібно щоб купити
-      note: "Примітка...",
-      // координати (стартові, потім ти перетягуєш)
-      y: 3600 + (i%5)*220,
-      x: 3600 + (Math.floor(i/5))*260,
-      // фото (можеш змінити на свої / або інтернет)
-      photos: [
-        "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=70",
-        "https://images.unsplash.com/photo-1520962917960-0b0d8a8b5b8a?auto=format&fit=crop&w=1200&q=70"
-      ]
-    };
-  });
+  // ДЕФОЛТНИЙ набір (можеш замінити на свої точки)
+  function makeDefaultPins(mapW, mapH){
+    // зробив координати, які точно в межах картинки
+    // x = lng (0..mapW), y = lat (0..mapH)
+    return Array.from({length: 15}, (_, i) => {
+      const id = i + 1;
+      return {
+        id,
+        name: `Будинок`,
+        price: 10000,
+        x: Math.round(mapW * (0.55 + (i%5)*0.04)),
+        y: Math.round(mapH * (0.25 + Math.floor(i/5)*0.06)),
+        photos: [
+          "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=70",
+          "https://images.unsplash.com/photo-1520962917960-0b0d8a8b5b8a?auto=format&fit=crop&w=1200&q=70"
+        ]
+      };
+    });
+  }
 
-  // Якщо вже щось зберігалося — беремо звідти
-  const saved = loadState();
-  const wagons = saved?.wagons ?? defaultWagons;
-
-  // =========================
-  // 6) HELPERS
-  // =========================
-  function wagonById(id) {
-    return wagons.find(w => w.id === id);
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;");
   }
 
   function renderDots(count, activeIndex) {
@@ -283,197 +207,131 @@
     return html;
   }
 
-  function cardHtml(w, photoIndex) {
-    const photos = (w.photos && w.photos.length) ? w.photos : ["wagon.jpg"];
+  function cardHtml(p, photoIndex){
+    const photos = (p.photos && p.photos.length) ? p.photos : ["wagon.png"];
     const idx = Math.max(0, Math.min(photoIndex ?? 0, photos.length-1));
 
     return `
-      <div class="rdrCard" data-id="${w.id}" data-idx="${idx}">
+      <div class="rdrCard" data-id="${p.id}" data-idx="${idx}">
         <div class="rdrTop">
           <img class="rdrImg" src="${photos[idx]}" alt="photo">
-
           <button class="rdrClose" data-action="close">×</button>
 
           ${photos.length>1 ? `<button class="navBtn navLeft" data-action="prev">‹</button>` : ``}
           ${photos.length>1 ? `<button class="navBtn navRight" data-action="next">›</button>` : ``}
-
           ${photos.length>1 ? renderDots(photos.length, idx) : ``}
         </div>
 
         <div class="rdrBody">
           <div class="titleRow">
-            <div class="name">${escapeHtml(w.name)}</div>
-            <div class="idPill">#${w.id}</div>
+            <div class="name">${escapeHtml(p.name)}</div>
+            <div class="idPill">#${p.id}</div>
           </div>
 
-          <div class="grid">
-            <div class="field">
-              <label>Ціна 💰</label>
-              <input type="number" step="1" data-field="price" value="${w.price}">
-            </div>
-
-            <div class="field">
-              <label>Вага ⚖️</label>
-              <input type="number" step="1" data-field="weight" value="${w.weight}">
-            </div>
-
-            <div class="field">
-              <label>Місця 🪑</label>
-              <input type="number" step="1" data-field="seats" value="${w.seats}">
-            </div>
-
-            <div class="field">
-              <label>Доставок 📦</label>
-              <input type="number" step="1" data-field="deliveries" value="${w.deliveries}">
-            </div>
-
-            <div class="field rowFull">
-              <label>Що потрібно, щоб купити ✅</label>
-              <input type="text" data-field="needToBuy" value="${escapeAttr(w.needToBuy)}">
-            </div>
-
-            <div class="field rowFull">
-              <label>Примітка 📝</label>
-              <textarea data-field="note">${escapeHtml(w.note)}</textarea>
-            </div>
-
-            <div class="field rowFull">
-              <label>Фото (через кому) 📷</label>
-              <input type="text" data-field="photos" value="${escapeAttr((w.photos||[]).join(', '))}">
-            </div>
-          </div>
-
-          <div class="actions">
-            <button class="btn" data-action="save">💾 Зберегти</button>
-            <button class="btn" data-action="resetPos">↩️ Скинути позицію</button>
-            <div class="hint">
-              ✅ Повозку можна <b>перетягувати</b> по карті.<br>
-              Координати збережуться після оновлення сторінки.
-            </div>
+          <div class="metaRow">
+            <span class="pricePill"><span class="coin"></span> ${Number(p.price||0).toLocaleString('uk-UA')}</span>
           </div>
         </div>
       </div>
     `;
   }
 
-  function escapeHtml(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;");
-  }
-  function escapeAttr(s){
-    return escapeHtml(s).replaceAll("\n"," ");
+  function markerHtml(id){
+    return `
+      <div class="pinWrap">
+        <div class="pinBadge">#${id}</div>
+        <div class="pinIcon"><img src="wagon.png" alt=""></div>
+      </div>
+    `;
   }
 
-  // =========================
-  // 7) MARKERS + POPUPS
-  // =========================
-  const markers = new Map(); // id -> marker
+  // 1) Спершу зчитуємо розміри map.jpg, щоб Leaflet працював 100% правильно
+  const img = new Image();
+  img.onload = () => initMap(img.width, img.height);
+  img.onerror = () => {
+    alert("Не можу завантажити map.jpg. Перевір: файл називається точно map.jpg і лежить поруч з index.html. Якщо відкриваєш як file:// — краще запусти локальний сервер.");
+  };
+  img.src = "map.jpg";
 
-  function openWagonPopup(w, photoIndex = 0) {
-    const marker = markers.get(w.id);
-    if (!marker) return;
+  function initMap(MAP_WIDTH, MAP_HEIGHT){
+    // 2) INIT MAP
+    const map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -2,
+      maxZoom: 2,
+      zoomControl: true
+    });
 
-    const popup = L.popup({ closeButton: false, maxWidth: 540 })
-      .setLatLng([w.y, w.x])
-      .setContent(cardHtml(w, photoIndex))
-      .openOn(map);
+    const bounds = [[0,0],[MAP_HEIGHT, MAP_WIDTH]];
+    L.imageOverlay('map.jpg', bounds).addTo(map);
+    map.fitBounds(bounds);
+    map.setMaxBounds(bounds);
 
-    // після відкриття - підключаємо кнопки та інпути
-    setTimeout(() => bindCardControls(w.id), 0);
-  }
+    // 3) DATA
+    const saved = loadState();
+    const pins = saved?.pins ?? makeDefaultPins(MAP_WIDTH, MAP_HEIGHT);
 
-  function bindCardControls(id){
-    const card = document.querySelector(`.rdrCard[data-id="${id}"]`);
-    if (!card) return;
-    const w = wagonById(id);
-    if (!w) return;
+    const markers = new Map();
 
-    const getIdx = () => parseInt(card.getAttribute("data-idx"), 10) || 0;
+    function pinById(id){ return pins.find(x => x.id === id); }
 
-    const photos = (w.photos && w.photos.length) ? w.photos : ["wagon.jpg"];
+    function openPinPopup(p, photoIndex = 0){
+      const marker = markers.get(p.id);
+      if (!marker) return;
 
-    const closeBtn = card.querySelector('[data-action="close"]');
-    if (closeBtn) closeBtn.onclick = () => map.closePopup();
+      L.popup({ closeButton: false, maxWidth: 540 })
+        .setLatLng([p.y, p.x])
+        .setContent(cardHtml(p, photoIndex))
+        .openOn(map);
 
-    const prevBtn = card.querySelector('[data-action="prev"]');
-    const nextBtn = card.querySelector('[data-action="next"]');
+      setTimeout(() => bindCard(p.id), 0);
+    }
 
-    if (prevBtn) prevBtn.onclick = () => {
-      const idx = (getIdx() - 1 + photos.length) % photos.length;
-      openWagonPopup(w, idx);
-    };
-    if (nextBtn) nextBtn.onclick = () => {
-      const idx = (getIdx() + 1) % photos.length;
-      openWagonPopup(w, idx);
-    };
+    function bindCard(id){
+      const card = document.querySelector(`.rdrCard[data-id="${id}"]`);
+      if (!card) return;
+      const p = pinById(id);
+      if (!p) return;
 
-    const saveBtn = card.querySelector('[data-action="save"]');
-    if (saveBtn) saveBtn.onclick = () => {
-      // зчитуємо поля
-      card.querySelectorAll('[data-field]').forEach(el => {
-        const field = el.getAttribute('data-field');
-        if (!field) return;
+      const photos = (p.photos && p.photos.length) ? p.photos : ["wagon.png"];
+      const getIdx = () => parseInt(card.getAttribute("data-idx"), 10) || 0;
 
-        if (field === 'price' || field === 'weight' || field === 'seats' || field === 'deliveries'){
-          w[field] = parseInt(el.value || "0", 10);
-        } else if (field === 'photos') {
-          w.photos = String(el.value || "")
-            .split(',')
-            .map(x => x.trim())
-            .filter(Boolean);
-        } else {
-          w[field] = el.value ?? "";
-        }
+      const closeBtn = card.querySelector('[data-action="close"]');
+      if (closeBtn) closeBtn.onclick = () => map.closePopup();
+
+      const prevBtn = card.querySelector('[data-action="prev"]');
+      const nextBtn = card.querySelector('[data-action="next"]');
+
+      if (prevBtn) prevBtn.onclick = () => openPinPopup(p, (getIdx() - 1 + photos.length) % photos.length);
+      if (nextBtn) nextBtn.onclick = () => openPinPopup(p, (getIdx() + 1) % photos.length);
+    }
+
+    // 4) MARKERS
+    pins.forEach(p => {
+      const icon = L.divIcon({
+        className: "",
+        html: markerHtml(p.id),
+        iconSize: [44, 44],
+        iconAnchor: [0, 0] // ми позиціонуємо через transform у CSS
       });
 
-      // зберегти
-      saveState({ wagons });
-      // оновити попап (щоб заголовок/фото оновились)
-      openWagonPopup(w, getIdx());
-    };
+      const m = L.marker([p.y, p.x], { icon, draggable: true }).addTo(map);
+      markers.set(p.id, m);
 
-    const resetBtn = card.querySelector('[data-action="resetPos"]');
-    if (resetBtn) resetBtn.onclick = () => {
-      // повертаємо в дефолт для цього id
-      const d = defaultWagons.find(x => x.id === w.id);
-      if (!d) return;
-      w.x = d.x; w.y = d.y;
-      const marker = markers.get(w.id);
-      marker.setLatLng([w.y, w.x]);
-      saveState({ wagons });
-      openWagonPopup(w, getIdx());
-    };
-  }
-
-  // створюємо маркери
-  wagons.forEach(w => {
-    const marker = L.marker([w.y, w.x], {
-      icon: wagonIcon,
-      draggable: true
-    }).addTo(map);
-
-    markers.set(w.id, marker);
-
-    marker.on('click', () => openWagonPopup(w, 0));
-
-    // перетягування — зберігає координати
-    marker.on('dragend', (e) => {
-      const ll = e.target.getLatLng();
-      w.y = ll.lat;
-      w.x = ll.lng;
-      saveState({ wagons });
+      m.on('click', () => openPinPopup(p, 0));
+      m.on('dragend', (e) => {
+        const ll = e.target.getLatLng();
+        p.y = ll.lat;
+        p.x = ll.lng;
+        saveState({ pins });
+      });
     });
-  });
 
-  // =========================
-  // 8) КЛІК ПО КАРТІ = КООРДИНАТИ
-  // =========================
-  map.on('click', (e) => {
-    alert(`Координати:\nY(lat): ${Math.round(e.latlng.lat)}\nX(lng): ${Math.round(e.latlng.lng)}`);
-  });
+    // 5) КЛІК по карті = координати
+    map.on('click', (e) => {
+      alert(`Координати:\nY(lat): ${Math.round(e.latlng.lat)}\nX(lng): ${Math.round(e.latlng.lng)}`);
+    });
+  }
 </script>
 </body>
 </html>
