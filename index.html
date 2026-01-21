@@ -151,7 +151,7 @@
       white-space: nowrap;
     }
 
-    /* stats grid */
+    /* stats */
     .statsGrid{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -219,14 +219,13 @@
   const MAP_URL   = basePath + "map.jpg";
   const WAGON_URL = basePath + "wagon.png";
 
-  // cache-bust (щоб GitHub кеш не заважав)
+  // cache-bust (щоб GitHub кеш не заважав після пуша)
   const bust = `?v=${Date.now()}`;
 
   // =========================
   // STORAGE
   // =========================
   const STORAGE_KEY = "rdr2_wagons_v2";
-
   function loadState() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); }
     catch(e){ return null; }
@@ -235,33 +234,46 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
-  // =========================
-  // 15 WAGONS (W1..W15)
-  // =========================
-  function makeDefaultWagons(mapW, mapH){
-    return Array.from({length: 15}, (_, i) => {
-      const id = i + 1;
-      return {
-        id,
-        name: `W${id}`,            // ✅ назва
-        price: 10000,              // ✅ Ціна
-        passengers: 2,             // ✅ Пасажирів
-        slots: 10,                 // ✅ Слоти
-        kg: 200,                   // ✅ Кг
-        deliveriesToBuy: 0,        // ✅ Потрібно доставок для купівлі
+  // ==========================================================
+  // ✅ ТУТ ТИ МІНЯЄШ ДАНІ ПОВОЗОК (W1..W15)
+  // ==========================================================
+  // photos:
+  // - локально: basePath + "W1.jpg"
+  // - або URL: "https://....jpg"
+  //
+  // x,y (позиції) ми потім підставимо твої (або ти напишеш координати)
+  const WAGONS_DATA = [
+    {
+      id: 1,
+      name: "W1",
+      price: 3100,
+      deliveriesToBuy: 20,
+      passengers: 2,
+      slots: 0,
+      kg: 0,
+      photos: [basePath + "W1.jpg"],
 
-        // ✅ координати (поки тимчасові — потім розставиш/скинеш)
-        x: Math.round(mapW * (0.55 + (i%5)*0.04)),
-        y: Math.round(mapH * (0.25 + Math.floor(i/5)*0.06)),
+      // тимчасово (потім замінимо на твої)
+      x: null,
+      y: null
+    },
 
-        // ✅ фото ти підставиш свої (можуть бути локальні "w1.jpg" або URL)
-        photos: [
-          // приклад: basePath + "w1.jpg"
-          "https://images.unsplash.com/photo-1520975869018-91f5c6fd5c92?auto=format&fit=crop&w=1400&q=70"
-        ]
-      };
-    });
-  }
+    // W2..W15 поки пусті — просто заповнюй так само
+    { id: 2,  name: "W2",  price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 3,  name: "W3",  price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 4,  name: "W4",  price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 5,  name: "W5",  price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 6,  name: "W6",  price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 7,  name: "W7",  price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 8,  name: "W8",  price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 9,  name: "W9",  price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 10, name: "W10", price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 11, name: "W11", price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 12, name: "W12", price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 13, name: "W13", price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 14, name: "W14", price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+    { id: 15, name: "W15", price: 0, deliveriesToBuy: 0, passengers: 0, slots: 0, kg: 0, photos: [], x: null, y: null },
+  ];
 
   // =========================
   // helpers
@@ -273,14 +285,9 @@
       .replaceAll(">","&gt;")
       .replaceAll('"',"&quot;");
   }
-  function fmtInt(n){
-    const x = Number(n || 0);
-    return Number.isFinite(x) ? Math.round(x).toString() : "0";
-  }
-  function fmtPrice(n){
-    const x = Number(n || 0);
-    return Number.isFinite(x) ? x.toLocaleString('uk-UA') : "0";
-  }
+  function num(n){ const x = Number(n||0); return Number.isFinite(x) ? x : 0; }
+  function fmtInt(n){ return Math.round(num(n)).toString(); }
+  function fmtPrice(n){ return num(n).toLocaleString('uk-UA'); }
 
   function renderDots(count, activeIndex) {
     let html = `<div class="dotsWrap">`;
@@ -332,9 +339,7 @@
           </div>
 
           <div class="priceRow">
-            <div>
-              <div class="priceLabel">Ціна</div>
-            </div>
+            <div class="priceLabel">Ціна</div>
             <div class="priceValue">${fmtPrice(w.price)}</div>
           </div>
         </div>
@@ -352,7 +357,7 @@
   }
 
   // =========================
-  // preload map.jpg
+  // preload map.jpg to get size
   // =========================
   const preload = new Image();
   preload.onload = () => initMap(preload.width, preload.height);
@@ -380,12 +385,23 @@
 
     const bounds = [[0,0],[MAP_HEIGHT, MAP_WIDTH]];
     L.imageOverlay(MAP_URL + bust, bounds).addTo(map);
-
     map.fitBounds(bounds);
     map.setMaxBounds(bounds);
 
+    // беремо з localStorage (позиції після drag), або з WAGONS_DATA
     const saved = loadState();
-    const wagons = saved?.wagons ?? makeDefaultWagons(MAP_WIDTH, MAP_HEIGHT);
+
+    // зробимо копію даних + поставимо дефолтні координати якщо null
+    const wagons = (saved?.wagons ?? WAGONS_DATA.map(w => ({...w}))).map((w, idx) => {
+      const ww = {...w};
+
+      // Якщо координати ще не задані — ставимо тимчасові "кучкою"
+      if (ww.x == null || ww.y == null){
+        ww.x = Math.round(MAP_WIDTH * (0.55 + (idx%5)*0.04));
+        ww.y = Math.round(MAP_HEIGHT * (0.25 + Math.floor(idx/5)*0.06));
+      }
+      return ww;
+    });
 
     const markers = new Map();
     const wagonById = (id) => wagons.find(x => x.id === id);
@@ -435,6 +451,7 @@
 
       m.on('click', () => openWagonPopup(w, 0));
 
+      // drag = зберігає позицію
       m.on('dragend', (e) => {
         const ll = e.target.getLatLng();
         w.y = ll.lat;
