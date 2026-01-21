@@ -10,14 +10,33 @@
 
   <style>
     body { margin:0; background:#000; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-    #map { height:100vh; width:100vw; background:#000; }
+
+    /* ✅ фон як у карти (не чорний) */
+    #map{
+      height:100vh;
+      width:100vw;
+      background: #cdb38f; /* базовий колір карти */
+    }
+
+    /* ✅ м'яка віньєтка по краях */
+    #map::after{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 45%,
+        rgba(0,0,0,0) 45%,
+        rgba(0,0,0,.16) 75%,
+        rgba(0,0,0,.30) 100%);
+      mix-blend-mode: multiply;
+    }
 
     /* Popup shell */
     .leaflet-popup-content-wrapper { background: transparent; box-shadow:none; }
     .leaflet-popup-content { margin: 0; }
     .leaflet-popup-tip { background: rgba(40,28,16,.92); }
 
-    /* Marker (бейдж + іконка як на скріні) */
+    /* Marker (бейдж + іконка) */
     .pinWrap{
       position: relative;
       width: 44px; height: 44px;
@@ -26,20 +45,23 @@
       user-select: none;
       pointer-events: auto;
     }
+
+    /* ✅ цифри НАД іконкою */
     .pinBadge{
-  position:absolute;
-  top: -16px;       /* вище */
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 3px 7px;
-  border-radius: 999px;
-  font-weight: 900;
-  font-size: 12px;
-  color: #f3e6cf;
-  background: rgba(35,24,14,.92);
-  border: 1px solid rgba(255,255,255,.14);
-  white-space: nowrap;
+      position:absolute;
+      top: -16px;       /* вище над кружечком */
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 3px 7px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 12px;
+      color: #f3e6cf;
+      background: rgba(35,24,14,.92);
+      border: 1px solid rgba(255,255,255,.14);
+      white-space: nowrap;
     }
+
     .pinIcon{
       position:absolute;
       inset: 0;
@@ -162,9 +184,6 @@
   // =========================
   // PATH FIX (GitHub Pages)
   // =========================
-  // Працює для:
-  // - https://username.github.io/
-  // - https://username.github.io/repo/
   const basePath = location.pathname.endsWith("/")
     ? location.pathname
     : location.pathname.replace(/[^/]+$/, "");
@@ -172,7 +191,7 @@
   const MAP_URL   = basePath + "map.jpg";
   const WAGON_URL = basePath + "wagon.png";
 
-  // cache-bust щоб не мучитись з кешем GitHub Pages
+  // cache-bust (щоб GitHub кеш не заважав після пуша)
   const bust = `?v=${Date.now()}`;
 
   // =========================
@@ -189,14 +208,14 @@
   }
 
   // =========================
-  // DEFAULT PINS (приклад)
+  // DEFAULT PINS (тимчасово)
   // =========================
   function makeDefaultPins(mapW, mapH){
     return Array.from({length: 15}, (_, i) => {
       const id = i + 1;
       return {
         id,
-        name: `Будинок`,
+        name: `Повозка`,
         price: 10000,
         x: Math.round(mapW * (0.55 + (i%5)*0.04)),
         y: Math.round(mapH * (0.25 + Math.floor(i/5)*0.06)),
@@ -267,7 +286,7 @@
   }
 
   // =========================
-  // 1) Спершу зчитуємо розмір map.jpg
+  // 1) preload map.jpg to get size
   // =========================
   const preload = new Image();
   preload.onload = () => initMap(preload.width, preload.height);
