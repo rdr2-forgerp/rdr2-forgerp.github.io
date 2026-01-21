@@ -206,20 +206,27 @@
     .stat .value{ font-size: 18px; font-weight: 900; letter-spacing: .2px; }
 
     .priceRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255,255,255,.10);
-    }
-    .priceLabel{ font-size: 12px; opacity: .85; font-weight: 800; }
-    .priceValue{
-      font-size: 28px;
-      font-weight: 1000;
-      letter-spacing: .4px;
-      color: #ffe6b2;
-      text-shadow: 0 10px 22px rgba(0,0,0,.35);
+   display:flex;
+  align-items:baseline;
+  justify-content:flex-start;   /* ✅ все зліва */
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.10);
+}
+
+.priceLabel{
+  font-size: 14px;
+  opacity: .90;
+  font-weight: 900;
+  color: #f3e6cf;
+}
+
+.priceValue{
+  font-size: 28px;
+  font-weight: 1000;
+  letter-spacing: .4px;
+  color: #ffe6b2;
+  text-shadow: 0 10px 22px rgba(0,0,0,.35);
     }
 
     @media (max-width: 620px){
