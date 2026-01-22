@@ -24,7 +24,7 @@
       overflow: hidden;
     }
 
-    /* важливо: прибираємо дефолтний сірий фон Leaflet */
+    /* прибираємо дефолтний сірий фон Leaflet */
     .leaflet-container,
     .leaflet-pane,
     .leaflet-map-pane,
@@ -54,7 +54,7 @@
       mix-blend-mode: multiply;
     }
 
-    /* ===== TOP RIGHT CONTROLS (не заважає зуму) ===== */
+    /* ===== TOP RIGHT CONTROLS ===== */
     .topControls{
       position: fixed;
       top: 12px;
@@ -167,16 +167,30 @@
     .wagonItem:hover{ background: rgba(255,255,255,.10); }
     .wagonLeft{
       display:flex; flex-direction: column; gap: 2px;
+      min-width: 0;
     }
-    .wagonTop{ font-weight: 1000; letter-spacing: .2px; }
-    .wagonSub{ font-size: 12px; opacity: .85; font-weight: 800; }
+    .wagonTop{
+      font-weight: 1000;
+      letter-spacing: .2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .wagonSub{
+      font-size: 12px;
+      opacity: .85;
+      font-weight: 900;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .wagonPill{
       padding: 6px 10px;
       border-radius: 999px;
       background: rgba(0,0,0,.22);
       border: 1px solid rgba(255,255,255,.12);
       color: var(--gold);
-      font-weight: 1000;
+      font-weight: 1100;
       white-space: nowrap;
     }
 
@@ -305,7 +319,7 @@
       border-radius: 999px;
       background: rgba(255,255,255,.08);
       border: 1px solid rgba(255,255,255,.12);
-      font-weight: 1000;
+      font-weight: 1100;
       color: var(--gold);
       white-space: nowrap;
     }
@@ -324,7 +338,7 @@
       padding: 10px 10px;
     }
     .stat .label{ font-size: 12px; opacity: .88; margin-bottom: 6px; font-weight: 900; }
-    .stat .value{ font-size: 18px; font-weight: 1000; letter-spacing: .2px; }
+    .stat .value{ font-size: 18px; font-weight: 1100; letter-spacing: .2px; }
 
     .priceRow{
       display:flex;
@@ -337,12 +351,12 @@
     .priceLabel{
       font-size: 14px;
       opacity: .90;
-      font-weight: 1000;
+      font-weight: 1100;
       color: var(--text);
     }
     .priceValue{
       font-size: 28px;
-      font-weight: 1100;
+      font-weight: 1200;
       letter-spacing: .4px;
       color: var(--gold);
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
@@ -359,7 +373,7 @@
     .pickTitle{
       font-size: 12px;
       opacity: .85;
-      font-weight: 1000;
+      font-weight: 1100;
       margin-bottom: 8px;
     }
     .pickBtns{
@@ -371,7 +385,7 @@
       border: 1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.18);
       color: var(--text);
-      font-weight: 1000;
+      font-weight: 1100;
       padding: 6px 10px;
       border-radius: 999px;
       cursor: pointer;
@@ -443,7 +457,27 @@
     { id: 15, title: "Возик", code: "W15", price: 8250, deliveriesToBuy: 120, passengers: 12, slots: 30, kg: 150, photos: ["W15.jpg"], x: null, y: null },
   ];
 
-  // ===== GROUPS (тут ти пишеш координати маркера групи) =====
+  // ===== МІСТА ДЛЯ СПИСКУ (і для груп) =====
+  // ти можеш тут міняти назви
+  const CITY_BY_ID = {
+    1: "Saint Denis",
+    2: "Van Horn",
+    3: "Dewberry Creerk",
+    4: "Valentine",
+    5: "Valentine",
+    6: "Valentine",
+    7: "Valentine",
+    8: "Gorge",
+    9: "Gorge",
+    10: "Strawberry",
+    11: "Strawberry",
+    12: "Strawberry",
+    13: "Blackwater",
+    14: "Tumbleweed",
+    15: "Tumbleweed",
+  };
+
+  // ===== GROUPS (координати маркера групи) =====
   const GROUPS = [
     { ids: [1], x: 1874, y: 747 },
     { ids: [2], x: 1969, y: 1182 },
@@ -624,8 +658,7 @@
     });
 
     // ===== MARKERS BY GROUPS (мітки фіксовані) =====
-    const wagonIdToOpener = new Map();      // wagonId -> function open this wagon
-    const wagonIdToGroupLabel = new Map();  // wagonId -> label #min-max
+    const wagonIdToOpener = new Map(); // wagonId -> function open this wagon
 
     GROUPS.forEach(g => {
       const label = groupLabel(g.ids);
@@ -637,7 +670,6 @@
         iconAnchor: [0, 0]
       });
 
-      // ✅ draggable: false — людям не можна рухати
       const marker = L.marker([g.y, g.x], { icon, draggable: false }).addTo(map);
 
       function openGroup(activeId){
@@ -650,17 +682,15 @@
 
       marker.on("click", () => openGroup(g.ids[0]));
 
-      // для сайдбару — відкривати конкретну повозку (навіть в групі)
       g.ids.forEach(id => {
         wagonIdToOpener.set(id, () => {
           map.setView([g.y, g.x], Math.max(map.getZoom(), 0), { animate: true });
           openGroup(id);
         });
-        wagonIdToGroupLabel.set(id, label);
       });
     });
 
-    // ===== COORDS TOGGLE (без alert) =====
+    // ===== COORDS TOGGLE (toast) =====
     let coordsEnabled = false;
     const coordsBtn = document.getElementById("coordsBtn");
     const toast = document.getElementById("coordsToast");
@@ -684,7 +714,7 @@
       showToast(`Y: ${Math.round(e.latlng.lat)}   X: ${Math.round(e.latlng.lng)}`);
     });
 
-    // ===== SIDEBAR =====
+    // ===== SIDEBAR (без W1 і без слова "група") =====
     const sidebar = document.getElementById("sidebar");
     const listBtn = document.getElementById("listBtn");
     const sideClose = document.getElementById("sideClose");
@@ -700,12 +730,12 @@
       .slice()
       .sort((a,b) => a.id - b.id)
       .map(w => {
-        const group = wagonIdToGroupLabel.get(w.id) || `#${w.id}`;
+        const city = CITY_BY_ID[w.id] || "";
         return `
           <div class="wagonItem" data-wagon="${w.id}">
             <div class="wagonLeft">
               <div class="wagonTop">#${w.id} — ${esc(w.title || "Возик")}</div>
-              <div class="wagonSub">${esc(w.code || "")} • група ${esc(group)}</div>
+              <div class="wagonSub">${esc(city)}</div>
             </div>
             <div class="wagonPill">${fmtPriceDot(w.price)} $</div>
           </div>
