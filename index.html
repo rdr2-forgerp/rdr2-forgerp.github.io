@@ -493,93 +493,126 @@
 
   <div id="map"></div>
 
-  <!-- ACCESS MODAL (для коників) -->
-  <div id="accessModal" style="
-    position:fixed; inset:0; z-index:10000;
-    background: rgba(0,0,0,.55);
-    display:none; align-items:center; justify-content:center;
-    padding: 16px;
-  ">
-    <div style="
-      width:min(520px, 92vw);
-      background: rgba(35,24,14,.95);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 18px;
-      box-shadow: 0 26px 70px rgba(0,0,0,.55);
-      color: #f3e6cf;
-      padding: 16px;
-    ">
-      <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
-        <div style="font-weight:1000; font-size:18px;">Доступ до “Коники”</div>
-        <button id="accessClose" type="button" style="
-          border: 1px solid rgba(255,255,255,.14);
-          background: rgba(255,255,255,.08);
-          color: #f3e6cf;
-          border-radius: 12px;
-          padding: 8px 10px;
-          font-weight: 900;
-          cursor:pointer;
-        ">×</button>
-      </div>
+  /* ===== Access Modal (Коники) ===== */
+.accessModal{
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
 
-      <div style="margin-top:10px; opacity:.95; line-height:1.35;">
-        Щоб купити інформацію потрібно <b>100$</b> — зв’яжіться на пошту.
-      </div>
+.accessBox{
+  width: min(560px, 92vw);
+  max-height: min(78vh, 620px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 
-      <label style="display:block; margin-top:12px; font-weight:900; font-size:13px; opacity:.9;">
-        Пошта (впиши пізніше):
-      </label>
-      <input id="accessEmail" placeholder="example@mail.com" type="email" style="
-        width:100%; margin-top:6px;
-        padding: 10px 12px; border-radius: 12px;
-        border: 1px solid rgba(255,255,255,.14);
-        background: rgba(0,0,0,.18);
-        color:#f3e6cf; outline:none;
-        font-weight:800;
-      " />
+  background: rgba(35,24,14,.96);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 18px;
+  box-shadow: 0 26px 70px rgba(0,0,0,.55);
+  color: #f3e6cf;
+  padding: 16px;
+}
 
-      <label style="display:block; margin-top:12px; font-weight:900; font-size:13px; opacity:.9;">
-        Одноразовий код доступу:
-      </label>
-      <input id="accessCode" placeholder="Наприклад: A7F3K9" autocomplete="one-time-code" style="
-        width:100%; margin-top:6px;
-        padding: 10px 12px; border-radius: 12px;
-        border: 1px solid rgba(255,255,255,.14);
-        background: rgba(0,0,0,.18);
-        color:#f3e6cf; outline:none;
-        font-weight:900;
-        letter-spacing: .12em;
-        text-transform: uppercase;
-      " />
+.accessHead{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 
-      <div id="accessError" style="margin-top:10px; color:#ffcf9a; font-weight:900; display:none;">
-        Невірний код.
-      </div>
+.accessTitle{
+  font-weight: 1000;
+  font-size: 18px;
+}
 
-      <div style="display:flex; gap:10px; margin-top:14px;">
-        <button id="accessSubmit" type="button" style="
-          flex:1;
-          border: 1px solid rgba(255,255,255,.14);
-          background: rgba(255,255,255,.12);
-          color:#ffe6b2;
-          border-radius: 14px;
-          padding: 12px 14px;
-          font-weight:1000;
-          cursor:pointer;
-        ">Відкрити доступ</button>
+.accessX{
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+  color: #f3e6cf;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-weight: 900;
+  cursor: pointer;
+  line-height: 1;
+}
 
-        <button id="accessCancel" type="button" style="
-          border: 1px solid rgba(255,255,255,.14);
-          background: rgba(0,0,0,.18);
-          color:#f3e6cf;
-          border-radius: 14px;
-          padding: 12px 14px;
-          font-weight:1000;
-          cursor:pointer;
-        ">Назад</button>
-      </div>
-    </div>
-  </div>
+.accessText{
+  margin-top: 10px;
+  opacity: .95;
+  line-height: 1.35;
+}
+
+.accessEmail{
+  display: inline-block;
+  margin-left: 6px;
+  font-weight: 1000;
+  color: #ffe6b2;
+  word-break: break-word;
+}
+
+.accessLabel{
+  display: block;
+  margin-top: 12px;
+  font-weight: 900;
+  font-size: 13px;
+  opacity: .9;
+}
+
+.accessInput{
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.18);
+  color: #f3e6cf;
+  outline: none;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.accessError{
+  margin-top: 10px;
+  color: #ffcf9a;
+  font-weight: 900;
+  display: none;
+}
+
+.accessBtns{
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.accessBtnPrimary{
+  flex: 1;
+  min-width: 180px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.12);
+  color: #ffe6b2;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+.accessBtn{
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.18);
+  color: #f3e6cf;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-weight: 1000;
+  cursor: pointer;
+}
 
 <script>
   // ===== PATH (GitHub Pages safe) =====
@@ -630,31 +663,40 @@
   ];
 
   // ===== ACCESS (Коники) =====
-  const HORSES_ACCESS = {
-    // 50 одноразових кодів (літери + цифри)
-    codes: new Set([
-      "A7F3K9","B2Q9M4","C8T1X7","D4H6P2","E9N2R8",
-      "F1K7Z3","G6V2S9","H3J8L1","J9C4W6","K2D7Y8",
-      "L5P1A9","M8R6F2","N1S9B4","P7X3C8","Q4L8D1",
-      "R9M2E7","S2N6G9","T8Q1H4","V3R7J2","W6T9K1",
-      "X1V4L7","Y8W2M6","Z5X9N3","AA7D2P9","AB1F8Q4",
-      "AC6G3R7","AD9H1S2","AE2J7T8","AF8K4V1","AG3L9W6",
-      "AH1M6X2","AJ7N2Y9","AK4P8Z5","AL9Q1A7","AM2R7B3",
-      "AN8S4C6","AP3T9D1","AQ1V6E8","AR7W2F4","AS4X8G9",
-      "AT9Y1H6","AV2Z7J3","AW8A4K1","AX3B9L7","AY1C6M2",
-      "AZ7D2N8","BA4F8P1","BB9G1Q6","BC2H7R3","BD8J4S9"
-    ]),
-    unlocked: false,
-    usedCodes: new Set(JSON.parse(localStorage.getItem("usedHorseCodes") || "[]"))
-  };
+// ===== ACCESS (Коники) =====
+const HORSES_UNLOCK_KEY = "horsesUnlocked";       // прапорець "доступ відкрито"
+const USED_CODES_KEY    = "usedHorseCodes";       // використані коди на цьому пристрої
 
-  function saveUsedHorseCodes(){
-    localStorage.setItem("usedHorseCodes", JSON.stringify([...HORSES_ACCESS.usedCodes]));
-  }
+const HORSES_ACCESS = {
+  codes: new Set([
+    "A7F3K9","B2Q9M4","C8T1X7","D4H6P2","E9N2R8",
+    "F1K7Z3","G6V2S9","H3J8L1","J9C4W6","K2D7Y8",
+    "L5P1A9","M8R6F2","N1S9B4","P7X3C8","Q4L8D1",
+    "R9M2E7","S2N6G9","T8Q1H4","V3R7J2","W6T9K1",
+    "X1V4L7","Y8W2M6","Z5X9N3","AA7D2P9","AB1F8Q4",
+    "AC6G3R7","AD9H1S2","AE2J7T8","AF8K4V1","AG3L9W6",
+    "AH1M6X2","AJ7N2Y9","AK4P8Z5","AL9Q1A7","AM2R7B3",
+    "AN8S4C6","AP3T9D1","AQ1V6E8","AR7W2F4","AS4X8G9",
+    "AT9Y1H6","AV2Z7J3","AW8A4K1","AX3B9L7","AY1C6M2",
+    "AZ7D2N8","BA4F8P1","BB9G1Q6","BC2H7R3","BD8J4S9"
+  ]),
+  // ✅ якщо вже відкривали доступ на цьому пристрої — не питаємо код знову
+  unlocked: localStorage.getItem(HORSES_UNLOCK_KEY) === "1",
+  usedCodes: new Set(JSON.parse(localStorage.getItem(USED_CODES_KEY) || "[]"))
+};
 
-  function normalizeCode(s){
-    return String(s || "").trim().toUpperCase().replace(/\s+/g, "");
-  }
+function saveUsedHorseCodes(){
+  localStorage.setItem(USED_CODES_KEY, JSON.stringify([...HORSES_ACCESS.usedCodes]));
+}
+
+function setHorsesUnlocked(){
+  HORSES_ACCESS.unlocked = true;
+  localStorage.setItem(HORSES_UNLOCK_KEY, "1");
+}
+
+function normalizeCode(s){
+  return String(s || "").trim().toUpperCase().replace(/\s+/g, "");
+}
 
   // ГРУПИ повозок (один маркер на групу)
   const GROUPS = [
