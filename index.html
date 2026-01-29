@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>RDR2 — Повозки</title>
+  <title>RDR2 — Повозки / Коники</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -73,6 +73,7 @@
       gap:10px;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
     }
     .btn:hover{ background: rgba(35,24,14,.98); }
 
@@ -88,9 +89,7 @@
     .leaflet-popup-tip { background: rgba(40,28,16,.92); }
 
     /* IMPORTANT: make popup not cover whole mobile screen */
-    .leaflet-popup{
-      margin-bottom: 12px;
-    }
+    .leaflet-popup{ margin-bottom: 12px; }
 
     /* ===== Marker ===== */
     .pinWrap{
@@ -284,7 +283,7 @@
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
     }
 
-    /* ===== Group picker ===== */
+    /* ===== Group picker (wagons) ===== */
     .pickRow{
       margin-bottom: 10px;
       padding: 10px;
@@ -446,7 +445,7 @@
   <div class="scrim" id="scrim"></div>
   <aside class="drawer" id="drawer" aria-hidden="true">
     <div class="drawerHeader">
-      <div class="drawerTitle">Список повозок</div>
+      <div class="drawerTitle" id="drawerTitle">Список</div>
       <button class="drawerClose" id="drawerClose" type="button">×</button>
     </div>
     <div class="drawerList" id="drawerList"></div>
@@ -455,6 +454,7 @@
   <!-- TOP BAR -->
   <div class="topBar">
     <button class="btn btnSmall" id="listBtn" type="button">☰ Список</button>
+    <button class="btn btnSmall" id="toggleBtn" type="button">🐎 Коники</button>
     <button class="btn btnWide" id="coordsBtn" type="button">📍 Координати: Вимк</button>
     <button class="btn btnSmall" id="reloadBtn" type="button">⟳ Оновити сторінку</button>
   </div>
@@ -470,9 +470,9 @@
 
   const MAP_URL   = basePath + "map.jpg" + bust;
   const WAGON_URL = basePath + "wagon.png" + bust;
+  const HORSE_URL = basePath + "horse.png" + bust; // додай horse.png поруч
 
   // ===== DATA =====
-  // Міста (як ти написав)
   function cityById(id){
     if (id === 1) return "Saint Denis";
     if (id === 2) return "Van Horn";
@@ -503,8 +503,14 @@
     { id: 15, title: "Возик", price: 8250, deliveriesToBuy: 120,passengers: 12, slots: 30, kg: 150, photos: ["W15.jpg"] },
   ].map(w => ({ ...w, city: cityById(w.id) }));
 
-  // ГРУПИ (один маркер на групу) + їх координати
-  // ✅ ТУТ ПИШЕШ РОЗТАШУВАННЯ ГРУПИ (x,y) ОДИН РАЗ — бо маркер один
+  // ✅ КОНИКИ (приклад). Додавай свої.
+  // x,y — координати на карті (як у повозок).
+  const HORSES_DATA = [
+    { id: 1, title: "Кінь", price: 450, photos: ["H1.jpg"], x: 1315, y: 1181 }, // приклад біля Valentine
+    { id: 2, title: "Кінь", price: 900, photos: ["H2.jpg"], x: 1318, y: 1172 }, // приклад
+  ];
+
+  // ГРУПИ повозок (один маркер на групу) + їх координати
   const GROUPS = [
     { ids: [1],        x: 1874, y: 747  },      // Saint Denis
     { ids: [2],        x: 1969, y: 1182 },      // Van Horn
@@ -550,16 +556,16 @@
     return `#${min}-${max}`;
   }
 
-  function markerHtml(label){
+  function markerHtml(label, iconUrl){
     return `
       <div class="pinWrap">
         <div class="pinBadge">${label}</div>
-        <div class="pinIcon"><img src="${WAGON_URL}" alt=""></div>
+        <div class="pinIcon"><img src="${iconUrl}" alt=""></div>
       </div>
     `;
   }
 
-  // ===== GROUP PICKER UI =====
+  // ===== GROUP PICKER UI (wagons) =====
   function groupHeaderHtml(ids, activeId){
     if (!ids || ids.length <= 1) return "";
     const buttons = ids.map(id => {
@@ -575,7 +581,7 @@
     `;
   }
 
-  // ===== CARD =====
+  // ===== CARD (wagons) =====
   function cardHtml(w, photoIndex){
     const rawPhotos = (w.photos && w.photos.length) ? w.photos : ["wagon.png"];
     const photos = rawPhotos.map(resolveUrl).filter(Boolean);
@@ -622,10 +628,44 @@
     return raw.replace(`<div class="rdrBody">`, `<div class="rdrBody">${groupHeaderHtml(groupIds, activeId)}`);
   }
 
+  // ===== CARD (horses: тільки фото + ціна) =====
+  function horseCardHtml(h, photoIndex){
+    const rawPhotos = (h.photos && h.photos.length) ? h.photos : ["horse.png"];
+    const photos = rawPhotos.map(resolveUrl).filter(Boolean);
+    const idx = Math.max(0, Math.min(photoIndex ?? 0, photos.length-1));
+    const src = photos[idx] || HORSE_URL;
+
+    return `
+      <div class="rdrCard" data-hid="${h.id}" data-idx="${idx}">
+        <div class="rdrTop">
+          <img class="rdrImg" src="${src}" alt="photo">
+          <button class="rdrClose" data-action="close" type="button">×</button>
+
+          ${photos.length>1 ? `<button class="navBtn navLeft" data-action="prev" type="button">‹</button>` : ``}
+          ${photos.length>1 ? `<button class="navBtn navRight" data-action="next" type="button">›</button>` : ``}
+          ${photos.length>1 ? renderDots(photos.length, idx) : ``}
+        </div>
+
+        <div class="rdrBody">
+          <div class="titleRow">
+            <div class="name">${esc(h.title || "Кінь")}</div>
+            <div class="idPill">#${h.id}</div>
+          </div>
+
+          <div class="priceRow">
+            <span class="priceLabel">Ціна</span>
+            <span class="priceValue">${fmtPriceDot(h.price)} $</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // ===== Drawer =====
   const drawer = document.getElementById("drawer");
   const scrim  = document.getElementById("scrim");
   const drawerList = document.getElementById("drawerList");
+  const drawerTitleEl = document.getElementById("drawerTitle");
 
   function openDrawer(){
     drawer.classList.add("open");
@@ -671,7 +711,6 @@
       zoomAnimation: false,
       markerZoomAnimation: false,
       fadeAnimation: false,
-      // mobile friendliness
       tap: true
     });
 
@@ -680,12 +719,17 @@
     map.fitBounds(bounds);
     map.setMaxBounds(bounds);
 
-    // ===== build helpers for groups =====
+    // ===== LAYERS (перемикання) =====
+    const wagonsLayer = L.layerGroup().addTo(map);
+    const horsesLayer = L.layerGroup(); // спочатку сховано
+    let currentMode = "wagons"; // "wagons" | "horses"
+
+    // ===== build helpers for wagon groups =====
     const wagonById = new Map(WAGONS_DATA.map(w => [w.id, w]));
     const groupByWagonId = new Map();
     GROUPS.forEach((g, idx) => g.ids.forEach(id => groupByWagonId.set(id, idx)));
 
-    // ===== create markers =====
+    // ===== create wagon markers (groups) =====
     const markersByGroupIndex = new Map();
 
     function openGroupPopup(groupIndex, activeId, photoIndex = 0){
@@ -700,7 +744,7 @@
         maxWidth: 600,
         autoPan: true,
         keepInView: true,
-        autoPanPaddingTopLeft: [14, 110],   // keep under top buttons
+        autoPanPaddingTopLeft: [14, 110],
         autoPanPaddingBottomRight: [14, 14],
         className: "rdrPopup"
       }).openPopup();
@@ -712,7 +756,6 @@
       const root = document.querySelector(`.rdrCard[data-id="${activeId}"]`);
       if (!root) return;
 
-      // IMPORTANT: allow clicking buttons inside popup (mobile fix)
       L.DomEvent.disableClickPropagation(root);
       L.DomEvent.disableScrollPropagation(root);
 
@@ -763,49 +806,175 @@
     GROUPS.forEach((g, idx) => {
       const icon = L.divIcon({
         className: "",
-        html: markerHtml(groupLabel(g.ids)),
+        html: markerHtml(groupLabel(g.ids), WAGON_URL),
         iconSize: [44, 44],
         iconAnchor: [0, 0]
       });
 
       const marker = L.marker([g.y, g.x], {
         icon,
-        draggable: false,          // ✅ зафіксовано (не можна рухати)
+        draggable: false,
         keyboard: false
-      }).addTo(map);
+      }).addTo(wagonsLayer);
 
       markersByGroupIndex.set(idx, marker);
-
       marker.on("click", () => openGroupPopup(idx, g.ids[0], 0));
     });
 
-    // ===== Drawer list (no W1 / no "група") =====
-    drawerList.innerHTML = WAGONS_DATA
-      .slice()
-      .sort((a,b) => a.id - b.id)
-      .map(w => `
-        <div class="wagonRow" data-wid="${w.id}">
-          <div class="wagonLeft">
-            <div class="wagonMain">#${w.id} — ${esc(w.title || "Возик")}</div>
-            <div class="wagonSub">${esc(w.city || "")}</div>
-          </div>
-          <div class="pricePill">${fmtPriceDot(w.price)} $</div>
-        </div>
-      `).join("");
+    // ===== HORSE MARKERS (поки без групування) =====
+    const horseMarkers = new Map();
 
-    drawerList.querySelectorAll(".wagonRow").forEach(row => {
-      row.onclick = () => {
-        const id = parseInt(row.getAttribute("data-wid"), 10);
-        const groupIndex = groupByWagonId.get(id);
-        if (!Number.isFinite(id) || groupIndex == null) return;
+    function openHorsePopup(horseId, photoIndex = 0){
+      const h = HORSES_DATA.find(x => x.id === horseId);
+      const marker = horseMarkers.get(horseId);
+      if (!h || !marker) return;
 
-        closeDrawer();
+      marker.bindPopup(horseCardHtml(h, photoIndex), {
+        closeButton: false,
+        maxWidth: 600,
+        autoPan: true,
+        keepInView: true,
+        autoPanPaddingTopLeft: [14, 110],
+        autoPanPaddingBottomRight: [14, 14],
+        className: "rdrPopup"
+      }).openPopup();
 
-        const g = GROUPS[groupIndex];
-        map.panTo([g.y, g.x], { animate: true, duration: 0.35 });
-        setTimeout(() => openGroupPopup(groupIndex, id, 0), 220);
-      };
+      setTimeout(() => {
+        const root = document.querySelector(`.rdrCard[data-hid="${horseId}"]`);
+        if (!root) return;
+
+        L.DomEvent.disableClickPropagation(root);
+        L.DomEvent.disableScrollPropagation(root);
+
+        const photos = ((h.photos && h.photos.length) ? h.photos : ["horse.png"]).map(resolveUrl).filter(Boolean);
+        const getIdx = () => parseInt(root.getAttribute("data-idx"), 10) || 0;
+
+        const imgEl = root.querySelector(".rdrImg");
+        if (imgEl) imgEl.onerror = () => { imgEl.src = HORSE_URL; };
+
+        const closeBtn = root.querySelector('[data-action="close"]');
+        if (closeBtn) closeBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); marker.closePopup(); };
+
+        const prevBtn = root.querySelector('[data-action="prev"]');
+        const nextBtn = root.querySelector('[data-action="next"]');
+
+        if (prevBtn && photos.length > 1){
+          prevBtn.onclick = (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const idx = (getIdx() - 1 + photos.length) % photos.length;
+            openHorsePopup(horseId, idx);
+          };
+        }
+
+        if (nextBtn && photos.length > 1){
+          nextBtn.onclick = (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const idx = (getIdx() + 1) % photos.length;
+            openHorsePopup(horseId, idx);
+          };
+        }
+      }, 0);
+    }
+
+    HORSES_DATA.forEach(h => {
+      const icon = L.divIcon({
+        className: "",
+        html: markerHtml(`H#${h.id}`, HORSE_URL),
+        iconSize: [44, 44],
+        iconAnchor: [0, 0]
+      });
+
+      const marker = L.marker([h.y, h.x], {
+        icon,
+        draggable: false,
+        keyboard: false
+      }).addTo(horsesLayer);
+
+      horseMarkers.set(h.id, marker);
+      marker.on("click", () => openHorsePopup(h.id, 0));
     });
+
+    // ===== DRAWER rendering (під режим) =====
+    function renderDrawer(){
+      if (currentMode === "wagons"){
+        drawerTitleEl.textContent = "Список повозок";
+        drawerList.innerHTML = WAGONS_DATA
+          .slice()
+          .sort((a,b) => a.id - b.id)
+          .map(w => `
+            <div class="wagonRow" data-type="wagon" data-id="${w.id}">
+              <div class="wagonLeft">
+                <div class="wagonMain">#${w.id} — ${esc(w.title || "Возик")}</div>
+                <div class="wagonSub">${esc(w.city || "")}</div>
+              </div>
+              <div class="pricePill">${fmtPriceDot(w.price)} $</div>
+            </div>
+          `).join("");
+      } else {
+        drawerTitleEl.textContent = "Список коників";
+        drawerList.innerHTML = HORSES_DATA
+          .slice()
+          .sort((a,b) => a.id - b.id)
+          .map(h => `
+            <div class="wagonRow" data-type="horse" data-id="${h.id}">
+              <div class="wagonLeft">
+                <div class="wagonMain">H#${h.id} — ${esc(h.title || "Кінь")}</div>
+                <div class="wagonSub">На мапі</div>
+              </div>
+              <div class="pricePill">${fmtPriceDot(h.price)} $</div>
+            </div>
+          `).join("");
+      }
+
+      drawerList.querySelectorAll(".wagonRow").forEach(row => {
+        row.onclick = () => {
+          const type = row.getAttribute("data-type");
+          const id = parseInt(row.getAttribute("data-id"), 10);
+          if (!Number.isFinite(id)) return;
+
+          closeDrawer();
+
+          if (type === "wagon"){
+            const groupIndex = groupByWagonId.get(id);
+            if (groupIndex == null) return;
+            const g = GROUPS[groupIndex];
+            map.panTo([g.y, g.x], { animate: true, duration: 0.35 });
+            setTimeout(() => openGroupPopup(groupIndex, id, 0), 220);
+          } else {
+            const h = HORSES_DATA.find(x => x.id === id);
+            if (!h) return;
+            map.panTo([h.y, h.x], { animate: true, duration: 0.35 });
+            setTimeout(() => openHorsePopup(id, 0), 220);
+          }
+        };
+      });
+    }
+
+    // ===== MODE toggle =====
+    const toggleBtn = document.getElementById("toggleBtn");
+
+    function applyMode(){
+      map.closePopup();
+
+      if (currentMode === "wagons"){
+        if (map.hasLayer(horsesLayer)) map.removeLayer(horsesLayer);
+        if (!map.hasLayer(wagonsLayer)) wagonsLayer.addTo(map);
+        toggleBtn.textContent = "🐎 Коники";
+      } else {
+        if (map.hasLayer(wagonsLayer)) map.removeLayer(wagonsLayer);
+        if (!map.hasLayer(horsesLayer)) horsesLayer.addTo(map);
+        toggleBtn.textContent = "🛒 Повозки";
+      }
+
+      renderDrawer();
+    }
+
+    toggleBtn.onclick = () => {
+      currentMode = (currentMode === "wagons") ? "horses" : "wagons";
+      applyMode();
+    };
+
+    applyMode();
 
     // ===== Coordinates click (toggleable) =====
     map.on('click', (e) => {
