@@ -260,6 +260,29 @@
       white-space: nowrap;
     }
 
+    .horseNameBig{
+      font-size: 18px;
+      font-weight: 1000;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-top: 2px;
+      margin-bottom: 8px;
+      line-height: 1.15;
+      text-shadow: 0 10px 22px rgba(0,0,0,.28);
+    }
+    .horseDesc{
+      opacity: .92;
+      line-height: 1.32;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      padding: 10px 10px;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
     .statsGrid{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -298,7 +321,7 @@
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
     }
 
-    /* ===== Group picker (wagons) ===== */
+    /* ===== Group picker ===== */
     .pickRow{
       margin-bottom: 10px;
       padding: 10px;
@@ -476,12 +499,12 @@
       align-items: center;
       justify-content: center;
       padding: 16px;
-      overflow: hidden; /* ✅ прибирає нижній скрол */
+      overflow: hidden;
     }
     .accessBox{
       width: min(560px, 92vw);
       max-height: min(78vh, 620px);
-      overflow: hidden; /* ✅ прибирає нижній скрол всередині */
+      overflow: hidden;
       -webkit-overflow-scrolling: touch;
       background: rgba(35,24,14,.96);
       border: 1px solid rgba(255,255,255,.14);
@@ -530,8 +553,6 @@
       opacity: .9;
       text-align: center;
     }
-
-    /* ✅ ЗМІНЕНО: поле вводу коротке і по центру */
     .accessInput{
       width: 220px;
       max-width: 100%;
@@ -548,7 +569,6 @@
       text-transform: uppercase;
       text-align: center;
     }
-
     .accessError{
       margin-top: 10px;
       color: #ffcf9a;
@@ -618,7 +638,6 @@
         <button class="accessX" id="accessClose" type="button">×</button>
       </div>
 
-      <!-- ✅ ЗМІНЕНО: текст + 100$ + пошта -->
       <div class="accessText">
         Для отримання доступу до розділу <b>“Коники”</b> потрібно <b>100$</b>.<br>
         Зверніться на пошту:
@@ -648,7 +667,7 @@
     const WAGON_URL = basePath + "wagon.png" + bust;
     const HORSE_URL = basePath + "horse.png" + bust;
 
-    // ===== DATA =====
+    // ===== DATA (WAGONS) =====
     function cityById(id){
       if (id === 1) return "Saint Denis";
       if (id === 2) return "Van Horn";
@@ -679,9 +698,96 @@
       { id: 15, title: "Возик", price: 8250, deliveriesToBuy: 120, passengers: 12, slots: 30, kg: 150, photos: ["W15.jpg"] },
     ].map(w => ({ ...w, city: cityById(w.id) }));
 
+    // ===== DATA (HORSES) =====
+    const BREED_DESC = {
+      "Criollo": "Малий і розумний мультиклас: швидкий, витривалий, дуже спритний.",
+      "Breton": "Міцний і м’язистий мультиклас: добре тримає темп у бою та в погонях.",
+      "Hungarian Halfbred": "Великий бойовий кінь: високе здоров’я та витривалість, стабільний під вогнем.",
+      "Turkoman": "Суміш скакуна й бойового: швидкий, витривалий, стрункий та agile.",
+      "Morgan": "Невеликий верховий: елегантна хода, комфортний для щоденної їзди.",
+      "Tennessee Walker": "Гладкий хід і елегантний корпус: зручний для довгих подорожей.",
+      "Kladruber": "Рідкісний і сильний: спокійний, “стедді”, універсальний під різні задачі.",
+      "Andalusian": "Компактний бойовий: міцний, з хорошими здоров’ям і стаміною.",
+      "Ardennes": "Важкий бойовий: дуже міцний, сміливий і витривалий у сутичках.",
+      "Бідося": "Дешева кляча: базовий варіант “аби їхало”."
+    };
+
     const HORSES_DATA = [
-      { id: 1, title: "Кінь", price: 450, photos: ["H1.jpg"], x: 1315, y: 1181 },
-      { id: 2, title: "Кінь", price: 900, photos: ["H2.jpg"], x: 1318, y: 1172 },
+      // 1-6 (Criollo)
+      { id: 1,  breed: "Criollo", coat: "Grillo blue roan overo", price: 1050 },
+      { id: 2,  breed: "Criollo", coat: "Grillo blue roan overo", price: 900  },
+      { id: 3,  breed: "Criollo", coat: "Grullo dun",            price: 850  },
+      { id: 4,  breed: "Criollo", coat: "Grillo marble sabino",  price: 800  },
+      { id: 5,  breed: "Criollo", coat: "Grillo sorrel overo",   price: 1000 },
+      { id: 6,  breed: "Criollo", coat: "Grillo bay brindle",    price: 950  },
+
+      // 7-12 (Breton)
+      { id: 7,  breed: "Breton", coat: "Sorrel",              price: 2350 },
+      { id: 8,  breed: "Breton", coat: "Steel grey",          price: 2400 },
+      { id: 9,  breed: "Breton", coat: "Grullo dun",          price: 2300 },
+      { id: 10, breed: "Breton", coat: "Mealy dapple bay",    price: 2450 },
+      { id: 11, breed: "Breton", coat: "Seal brown",          price: 2500 },
+      { id: 12, breed: "Breton", coat: "Red roan",            price: 2250 },
+
+      // 13-23 (Hungarian Halfbred + Turkoman)
+      { id: 13, breed: "Hungarian Halfbred", coat: "Piebald tobiano",     price: 1800 },
+      { id: 14, breed: "Hungarian Halfbred", coat: "Liver chestnut",      price: 1850 },
+      { id: 15, breed: "Hungarian Halfbred", coat: "Flaxen chestnut",     price: 1750 },
+      { id: 16, breed: "Hungarian Halfbred", coat: "Dark dapple grey",    price: 1700 },
+      { id: 17, breed: "Turkoman", coat: "Grey",     price: 1950 },
+      { id: 18, breed: "Turkoman", coat: "Gold",     price: 2200 },
+      { id: 19, breed: "Turkoman", coat: "Dark bay", price: 2050 },
+      { id: 20, breed: "Turkoman", coat: "Chestnut", price: 2150 },
+      { id: 21, breed: "Turkoman", coat: "Black",    price: 2100 },
+      { id: 22, breed: "Turkoman", coat: "Silver",   price: 2000 },
+      { id: 23, breed: "Turkoman", coat: "Perlino",  price: 1900 },
+
+      // 24-36 (Бідося + Morgan + Tennessee Walker)
+      { id: 24, breed: "Бідося", coat: "Бідося", price: 30 },
+      { id: 25, breed: "Morgan", coat: "Palomino",        price: 150 },
+      { id: 26, breed: "Morgan", coat: "Liver chestnut",  price: 175 },
+      { id: 27, breed: "Morgan", coat: "Flaxen chestnut", price: 150 },
+      { id: 28, breed: "Morgan", coat: "Bay",             price: 145 },
+      { id: 29, breed: "Morgan", coat: "Bay roan",        price: 125 },
+
+      { id: 30, breed: "Tennessee Walker", coat: "Black rabicano",   price: 450 },
+      { id: 31, breed: "Tennessee Walker", coat: "Chestnut",         price: 400 },
+      { id: 32, breed: "Tennessee Walker", coat: "Dapple bay",       price: 425 },
+      { id: 33, breed: "Tennessee Walker", coat: "Flaxen roan",      price: 375 },
+      { id: 34, breed: "Tennessee Walker", coat: "Gold palomino",    price: 425 },
+      { id: 35, breed: "Tennessee Walker", coat: "Mahogany",         price: 440 },
+      { id: 36, breed: "Tennessee Walker", coat: "Red roan",         price: 380 },
+
+      // 37-42 (Kladruber)
+      { id: 37, breed: "Kladruber", coat: "Black",             price: 1650 },
+      { id: 38, breed: "Kladruber", coat: "Cremello",          price: 1400 },
+      { id: 39, breed: "Kladruber", coat: "Dapple rose grey",  price: 1500 },
+      { id: 40, breed: "Kladruber", coat: "Grey",              price: 1450 },
+      { id: 41, breed: "Kladruber", coat: "Silver",            price: 1550 },
+      { id: 42, breed: "Kladruber", coat: "White",             price: 1600 },
+
+      // 43-48 (Andalusian + Ardennes)
+      { id: 43, breed: "Andalusian", coat: "Dark bay",       price: 1200 },
+      { id: 44, breed: "Andalusian", coat: "Perlino",        price: 1150 },
+      { id: 45, breed: "Andalusian", coat: "Rose grey",      price: 1100 },
+      { id: 46, breed: "Ardennes",   coat: "Bay roan",       price: 1300 },
+      { id: 47, breed: "Ardennes",   coat: "Iron grey",      price: 1350 },
+      { id: 48, breed: "Ardennes",   coat: "Strawberry roan",price: 1250 },
+    ].map(h => ({
+      ...h,
+      title: `Кінь - ${h.id}`,
+      fullName: `${h.breed} ${h.coat}`.trim(),
+      desc: BREED_DESC[h.breed] || "Швидкий, витривалий і надійний кінь.",
+      photos: [`H${h.id}.jpg`]
+    }));
+
+    const HORSE_GROUPS = [
+      { ids: [1,2,3,4,5,6],               x: 1965, y: 1183 },
+      { ids: [7,8,9,10,11,12],            x: 1132, y: 1493 },
+      { ids: [13,14,15,16,17,18,19,20,21,22,23], x: 319,  y: 436  },
+      { ids: [24,25,26,27,28,29,30,31,32,33,34,35,36],     x: 1311, y: 1180 },
+      { ids: [37,38,39,40,41,42],         x: 1038, y: 920  },
+      { ids: [43,44,45,46,47,48],         x: 1221, y: 763  },
     ];
 
     // ===== ACCESS (Коники) =====
@@ -767,7 +873,7 @@
       `;
     }
 
-    function groupHeaderHtml(ids, activeId){
+    function groupHeaderHtml(ids, activeId, title = "Вибери:"){
       if (!ids || ids.length <= 1) return "";
       const buttons = ids.map(id => {
         const active = id === activeId ? "active" : "";
@@ -776,7 +882,7 @@
 
       return `
         <div class="pickRow">
-          <div class="pickTitle">Вибери повозку:</div>
+          <div class="pickTitle">${esc(title)}</div>
           <div class="pickBtns">${buttons}</div>
         </div>
       `;
@@ -825,7 +931,7 @@
       const w = wagons.find(x => x.id === activeId);
       if (!w) return "";
       const raw = cardHtml(w, photoIndex);
-      return raw.replace(`<div class="rdrBody">`, `<div class="rdrBody">${groupHeaderHtml(groupIds, activeId)}`);
+      return raw.replace(`<div class="rdrBody">`, `<div class="rdrBody">${groupHeaderHtml(groupIds, activeId, "Вибери повозку:")}`);
     }
 
     function horseCardHtml(h, photoIndex){
@@ -847,9 +953,12 @@
 
           <div class="rdrBody">
             <div class="titleRow">
-              <div class="name">${esc(h.title || "Кінь")}</div>
-              <div class="idPill">#${h.id}</div>
+              <div class="name">${esc(h.title || `Кінь - ${h.id}`)}</div>
+              <div class="idPill">H#${h.id}</div>
             </div>
+
+            <div class="horseNameBig">${esc((h.fullName || "").toUpperCase())}</div>
+            <div class="horseDesc">${esc(h.desc || "")}</div>
 
             <div class="priceRow">
               <span class="priceLabel">Ціна</span>
@@ -858,6 +967,13 @@
           </div>
         </div>
       `;
+    }
+
+    function horseGroupCardHtml(horses, groupIds, activeId, photoIndex = 0){
+      const h = horses.find(x => x.id === activeId);
+      if (!h) return "";
+      const raw = horseCardHtml(h, photoIndex);
+      return raw.replace(`<div class="rdrBody">`, `<div class="rdrBody">${groupHeaderHtml(groupIds, activeId, "Вибери коника:")}`);
     }
 
     // ===== Drawer =====
@@ -926,11 +1042,17 @@
       const groupByWagonId = new Map();
       GROUPS.forEach((g, idx) => g.ids.forEach(id => groupByWagonId.set(id, idx)));
 
-      const markersByGroupIndex = new Map();
+      const horseById = new Map(HORSES_DATA.map(h => [h.id, h]));
+      const groupByHorseId = new Map();
+      HORSE_GROUPS.forEach((g, idx) => g.ids.forEach(id => groupByHorseId.set(id, idx)));
 
-      function openGroupPopup(groupIndex, activeId, photoIndex = 0){
+      const markersByWagonGroupIndex = new Map();
+      const markersByHorseGroupIndex = new Map();
+
+      // ===== WAGONS (group popups) =====
+      function openWagonGroupPopup(groupIndex, activeId, photoIndex = 0){
         const g = GROUPS[groupIndex];
-        const marker = markersByGroupIndex.get(groupIndex);
+        const marker = markersByWagonGroupIndex.get(groupIndex);
         if (!g || !marker) return;
 
         marker.bindPopup(groupCardHtml(WAGONS_DATA, g.ids, activeId, photoIndex), {
@@ -943,10 +1065,10 @@
           className: "rdrPopup"
         }).openPopup();
 
-        setTimeout(() => bindGroupPopup(activeId, marker, groupByWagonId), 0);
+        setTimeout(() => bindWagonGroupPopup(activeId, marker), 0);
       }
 
-      function bindGroupPopup(activeId, marker, groupByWagonId){
+      function bindWagonGroupPopup(activeId, marker){
         const root = document.querySelector(`.rdrCard[data-id="${activeId}"]`);
         if (!root) return;
 
@@ -971,7 +1093,7 @@
             e.preventDefault(); e.stopPropagation();
             const idx = (getIdx() - 1 + photos.length) % photos.length;
             const groupIndex = groupByWagonId.get(activeId);
-            openGroupPopup(groupIndex, activeId, idx);
+            openWagonGroupPopup(groupIndex, activeId, idx);
           };
         }
 
@@ -980,7 +1102,7 @@
             e.preventDefault(); e.stopPropagation();
             const idx = (getIdx() + 1) % photos.length;
             const groupIndex = groupByWagonId.get(activeId);
-            openGroupPopup(groupIndex, activeId, idx);
+            openWagonGroupPopup(groupIndex, activeId, idx);
           };
         }
 
@@ -991,7 +1113,7 @@
             const id = parseInt(btn.getAttribute("data-pick"), 10);
             const groupIndex = groupByWagonId.get(id);
             if (!Number.isFinite(id) || groupIndex == null) return;
-            openGroupPopup(groupIndex, id, 0);
+            openWagonGroupPopup(groupIndex, id, 0);
           };
         });
       }
@@ -1005,18 +1127,17 @@
         });
 
         const marker = L.marker([g.y, g.x], { icon, draggable: false, keyboard: false }).addTo(wagonsLayer);
-        markersByGroupIndex.set(idx, marker);
-        marker.on("click", () => openGroupPopup(idx, g.ids[0], 0));
+        markersByWagonGroupIndex.set(idx, marker);
+        marker.on("click", () => openWagonGroupPopup(idx, g.ids[0], 0));
       });
 
-      const horseMarkers = new Map();
+      // ===== HORSES (group popups) =====
+      function openHorseGroupPopup(groupIndex, activeId, photoIndex = 0){
+        const g = HORSE_GROUPS[groupIndex];
+        const marker = markersByHorseGroupIndex.get(groupIndex);
+        if (!g || !marker) return;
 
-      function openHorsePopup(horseId, photoIndex = 0){
-        const h = HORSES_DATA.find(x => x.id === horseId);
-        const marker = horseMarkers.get(horseId);
-        if (!h || !marker) return;
-
-        marker.bindPopup(horseCardHtml(h, photoIndex), {
+        marker.bindPopup(horseGroupCardHtml(HORSES_DATA, g.ids, activeId, photoIndex), {
           closeButton: false,
           maxWidth: 600,
           autoPan: true,
@@ -1026,56 +1147,73 @@
           className: "rdrPopup"
         }).openPopup();
 
-        setTimeout(() => {
-          const root = document.querySelector(`.rdrCard[data-hid="${horseId}"]`);
-          if (!root) return;
-
-          L.DomEvent.disableClickPropagation(root);
-          L.DomEvent.disableScrollPropagation(root);
-
-          const photos = ((h.photos && h.photos.length) ? h.photos : ["horse.png"]).map(resolveUrl).filter(Boolean);
-          const getIdx = () => parseInt(root.getAttribute("data-idx"), 10) || 0;
-
-          const imgEl = root.querySelector(".rdrImg");
-          if (imgEl) imgEl.onerror = () => { imgEl.src = HORSE_URL; };
-
-          const closeBtn = root.querySelector('[data-action="close"]');
-          if (closeBtn) closeBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); marker.closePopup(); };
-
-          const prevBtn = root.querySelector('[data-action="prev"]');
-          const nextBtn = root.querySelector('[data-action="next"]');
-
-          if (prevBtn && photos.length > 1){
-            prevBtn.onclick = (e) => {
-              e.preventDefault(); e.stopPropagation();
-              const idx = (getIdx() - 1 + photos.length) % photos.length;
-              openHorsePopup(horseId, idx);
-            };
-          }
-
-          if (nextBtn && photos.length > 1){
-            nextBtn.onclick = (e) => {
-              e.preventDefault(); e.stopPropagation();
-              const idx = (getIdx() + 1) % photos.length;
-              openHorsePopup(horseId, idx);
-            };
-          }
-        }, 0);
+        setTimeout(() => bindHorseGroupPopup(activeId, marker), 0);
       }
 
-      HORSES_DATA.forEach(h => {
+      function bindHorseGroupPopup(activeId, marker){
+        const root = document.querySelector(`.rdrCard[data-hid="${activeId}"]`);
+        if (!root) return;
+
+        L.DomEvent.disableClickPropagation(root);
+        L.DomEvent.disableScrollPropagation(root);
+
+        const h = horseById.get(activeId);
+        const photos = ((h?.photos && h.photos.length) ? h.photos : ["horse.png"]).map(resolveUrl).filter(Boolean);
+        const getIdx = () => parseInt(root.getAttribute("data-idx"), 10) || 0;
+
+        const imgEl = root.querySelector(".rdrImg");
+        if (imgEl) imgEl.onerror = () => { imgEl.src = HORSE_URL; };
+
+        const closeBtn = root.querySelector('[data-action="close"]');
+        if (closeBtn) closeBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); marker.closePopup(); };
+
+        const prevBtn = root.querySelector('[data-action="prev"]');
+        const nextBtn = root.querySelector('[data-action="next"]');
+
+        if (prevBtn && photos.length > 1){
+          prevBtn.onclick = (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const idx = (getIdx() - 1 + photos.length) % photos.length;
+            const groupIndex = groupByHorseId.get(activeId);
+            openHorseGroupPopup(groupIndex, activeId, idx);
+          };
+        }
+
+        if (nextBtn && photos.length > 1){
+          nextBtn.onclick = (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const idx = (getIdx() + 1) % photos.length;
+            const groupIndex = groupByHorseId.get(activeId);
+            openHorseGroupPopup(groupIndex, activeId, idx);
+          };
+        }
+
+        root.querySelectorAll("[data-pick]").forEach(btn => {
+          btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = parseInt(btn.getAttribute("data-pick"), 10);
+            const groupIndex = groupByHorseId.get(id);
+            if (!Number.isFinite(id) || groupIndex == null) return;
+            openHorseGroupPopup(groupIndex, id, 0);
+          };
+        });
+      }
+
+      HORSE_GROUPS.forEach((g, idx) => {
         const icon = L.divIcon({
           className: "",
-          html: markerHtml(`H#${h.id}`, HORSE_URL),
+          html: markerHtml(`H${groupLabel(g.ids)}`, HORSE_URL),
           iconSize: [44, 44],
           iconAnchor: [0, 0]
         });
 
-        const marker = L.marker([h.y, h.x], { icon, draggable: false, keyboard: false }).addTo(horsesLayer);
-        horseMarkers.set(h.id, marker);
-        marker.on("click", () => openHorsePopup(h.id, 0));
+        const marker = L.marker([g.y, g.x], { icon, draggable: false, keyboard: false }).addTo(horsesLayer);
+        markersByHorseGroupIndex.set(idx, marker);
+        marker.on("click", () => openHorseGroupPopup(idx, g.ids[0], 0));
       });
 
+      // ===== Drawer render =====
       function renderDrawer(){
         if (currentMode === "wagons"){
           drawerTitleEl.textContent = "Список повозок";
@@ -1099,8 +1237,8 @@
             .map(h => `
               <div class="wagonRow" data-type="horse" data-id="${h.id}">
                 <div class="wagonLeft">
-                  <div class="wagonMain">H#${h.id} — ${esc(h.title || "Кінь")}</div>
-                  <div class="wagonSub">На мапі</div>
+                  <div class="wagonMain">H#${h.id} — ${esc(h.fullName || "Кінь")}</div>
+                  <div class="wagonSub">${esc(h.breed || "")}</div>
                 </div>
                 <div class="pricePill">${fmtPriceDot(h.price)} $</div>
               </div>
@@ -1120,16 +1258,17 @@
               if (groupIndex == null) return;
               const g = GROUPS[groupIndex];
               map.panTo([g.y, g.x], { animate: true, duration: 0.35 });
-              setTimeout(() => openGroupPopup(groupIndex, id, 0), 220);
+              setTimeout(() => openWagonGroupPopup(groupIndex, id, 0), 220);
             } else {
               if (!HORSES_ACCESS.unlocked){
                 showAccessModal();
                 return;
               }
-              const h = HORSES_DATA.find(x => x.id === id);
-              if (!h) return;
-              map.panTo([h.y, h.x], { animate: true, duration: 0.35 });
-              setTimeout(() => openHorsePopup(id, 0), 220);
+              const groupIndex = groupByHorseId.get(id);
+              if (groupIndex == null) return;
+              const g = HORSE_GROUPS[groupIndex];
+              map.panTo([g.y, g.x], { animate: true, duration: 0.35 });
+              setTimeout(() => openHorseGroupPopup(groupIndex, id, 0), 220);
             }
           };
         });
