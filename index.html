@@ -105,8 +105,8 @@
     }
 
     /* Popup shell */
-    .leaflet-popup-content-wrapper { background: transparent; box-shadow:none; }
-    .leaflet-popup-content { margin: 0; }
+    .leaflet-popup-content-wrapper { background: transparent; box-shadow:none; padding:0 !important; }
+    .leaflet-popup-content { margin: 0 !important; width: auto !important; }
     .leaflet-popup-tip { background: rgba(40,28,16,.92); }
     .leaflet-popup{ margin-bottom: 12px; }
 
@@ -146,11 +146,11 @@
     }
     .pinIcon img{ width: 26px; height: 26px; display:block; }
 
-    /* ===== Card ===== */
+    /* ===== Card (АДАПТИВ + ЗАОКРУГЛЕННЯ) ===== */
     .rdrCard{
-      width: 540px;
+      width: clamp(320px, 92vw, 560px);
       border-radius: 26px;
-      overflow: hidden;
+      overflow: hidden; /* щоб заокруглення працювало */
       background: var(--ui2);
       color: var(--text);
       box-shadow: 0 26px 70px rgba(0,0,0,.55);
@@ -159,25 +159,36 @@
     }
     @media (max-width: 720px){
       .rdrCard{
-        width: min(92vw, 560px);
+        border-radius: 22px;
         max-height: calc(100vh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
       }
     }
 
+    /* ВЕРХ з фото: інтерактивна висота під співвідношення фото */
     .rdrTop{
       position: relative;
-      height: 290px;
       background: #1a110a;
       flex: 0 0 auto;
+
+      /* дефолтне співвідношення, JS поставить реальне */
+      aspect-ratio: var(--ar, 16 / 9);
+
+      border-top-left-radius: 26px;
+      border-top-right-radius: 26px;
+      overflow: hidden;
     }
     @media (max-width: 720px){
-      .rdrTop{ height: 200px; }
+      .rdrTop{
+        border-top-left-radius: 22px;
+        border-top-right-radius: 22px;
+      }
     }
 
+    /* Фото */
     .rdrImg{
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: cover; /* якщо хочеш без обрізки: заміни на contain */
       display:block;
       filter: saturate(.95) contrast(1.05);
       background: rgba(0,0,0,.15);
@@ -234,7 +245,7 @@
     }
     @media (max-width: 720px){
       .rdrBody{
-        max-height: calc(100vh - 140px - 200px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        max-height: calc(100vh - 140px - 40vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
       }
     }
 
@@ -713,7 +724,6 @@
     };
 
     const HORSES_DATA = [
-      // 1-6 (Criollo)
       { id: 1,  breed: "Criollo", coat: "Grillo blue roan overo", price: 1050 },
       { id: 2,  breed: "Criollo", coat: "Grillo blue roan overo", price: 900  },
       { id: 3,  breed: "Criollo", coat: "Grullo dun",            price: 850  },
@@ -721,7 +731,6 @@
       { id: 5,  breed: "Criollo", coat: "Grillo sorrel overo",   price: 1000 },
       { id: 6,  breed: "Criollo", coat: "Grillo bay brindle",    price: 950  },
 
-      // 7-12 (Breton)
       { id: 7,  breed: "Breton", coat: "Sorrel",              price: 2350 },
       { id: 8,  breed: "Breton", coat: "Steel grey",          price: 2400 },
       { id: 9,  breed: "Breton", coat: "Grullo dun",          price: 2300 },
@@ -729,7 +738,6 @@
       { id: 11, breed: "Breton", coat: "Seal brown",          price: 2500 },
       { id: 12, breed: "Breton", coat: "Red roan",            price: 2250 },
 
-      // 13-23 (Hungarian Halfbred + Turkoman)
       { id: 13, breed: "Hungarian Halfbred", coat: "Piebald tobiano",     price: 1800 },
       { id: 14, breed: "Hungarian Halfbred", coat: "Liver chestnut",      price: 1850 },
       { id: 15, breed: "Hungarian Halfbred", coat: "Flaxen chestnut",     price: 1750 },
@@ -742,7 +750,6 @@
       { id: 22, breed: "Turkoman", coat: "Silver",   price: 2000 },
       { id: 23, breed: "Turkoman", coat: "Perlino",  price: 1900 },
 
-      // 24-36 (Бідося + Morgan + Tennessee Walker)
       { id: 24, breed: "Бідося", coat: "Бідося", price: 30 },
       { id: 25, breed: "Morgan", coat: "Palomino",        price: 150 },
       { id: 26, breed: "Morgan", coat: "Liver chestnut",  price: 175 },
@@ -758,7 +765,6 @@
       { id: 35, breed: "Tennessee Walker", coat: "Mahogany",         price: 440 },
       { id: 36, breed: "Tennessee Walker", coat: "Red roan",         price: 380 },
 
-      // 37-42 (Kladruber)
       { id: 37, breed: "Kladruber", coat: "Black",             price: 1650 },
       { id: 38, breed: "Kladruber", coat: "Cremello",          price: 1400 },
       { id: 39, breed: "Kladruber", coat: "Dapple rose grey",  price: 1500 },
@@ -766,7 +772,6 @@
       { id: 41, breed: "Kladruber", coat: "Silver",            price: 1550 },
       { id: 42, breed: "Kladruber", coat: "White",             price: 1600 },
 
-      // 43-48 (Andalusian + Ardennes)
       { id: 43, breed: "Andalusian", coat: "Dark bay",       price: 1200 },
       { id: 44, breed: "Andalusian", coat: "Perlino",        price: 1150 },
       { id: 45, breed: "Andalusian", coat: "Rose grey",      price: 1100 },
@@ -789,7 +794,7 @@
       { ids: [37,38,39,40,41,42],         x: 1038, y: 920  },
       { ids: [43,44,45,46,47,48],         x: 1221, y: 763  },
     ];
-
+    
     // ===== ACCESS (Коники) =====
     const HORSES_UNLOCK_KEY = "horsesUnlocked";
     const USED_CODES_KEY    = "usedHorseCodes";
