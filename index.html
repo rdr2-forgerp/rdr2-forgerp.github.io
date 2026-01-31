@@ -32,7 +32,6 @@
       background: var(--bg);
     }
 
-    /* Віньєтка */
     #map::after{
       content:"";
       position: fixed;
@@ -46,7 +45,6 @@
       mix-blend-mode: multiply;
     }
 
-    /* ===== Top Bar Buttons ===== */
     .topBar{
       position: fixed;
       top: calc(10px + env(safe-area-inset-top));
@@ -80,7 +78,6 @@
     }
     .btn:hover{ background: rgba(35,24,14,.98); }
 
-    .btnWide{ flex: 1; }
     .btnSmall{ min-width: 118px; }
 
     @media (max-width: 420px){
@@ -99,18 +96,14 @@
       left: calc(10px + env(safe-area-inset-left));
     }
     @media (max-width: 420px){
-      .leaflet-top.leaflet-left {
-        top: calc(94px + env(safe-area-inset-top));
-      }
+      .leaflet-top.leaflet-left { top: calc(94px + env(safe-area-inset-top)); }
     }
 
-    /* Popup shell */
     .leaflet-popup-content-wrapper { background: transparent; box-shadow:none; padding:0 !important; }
     .leaflet-popup-content { margin: 0 !important; width: auto !important; }
     .leaflet-popup-tip { background: rgba(40,28,16,.92); }
     .leaflet-popup{ margin-bottom: 12px; }
 
-    /* ===== Marker ===== */
     .pinWrap{
       position: relative;
       width: 44px; height: 44px;
@@ -146,7 +139,6 @@
     }
     .pinIcon img{ width: 26px; height: 26px; display:block; }
 
-    /* ===== Card ===== */
     .rdrCard{
       width: clamp(320px, 92vw, 560px);
       border-radius: 26px;
@@ -309,14 +301,11 @@
       align-items:baseline;
       justify-content:flex-start;
       gap: 10px;
-
       position: sticky;
       bottom: 0;
-
       padding-top: 12px;
       padding-bottom: calc(10px + env(safe-area-inset-bottom));
       margin-top: 10px;
-
       border-top: 1px solid rgba(255,255,255,.10);
       background: linear-gradient(to top, rgba(30,20,12,.98), rgba(30,20,12,.60));
       backdrop-filter: blur(2px);
@@ -335,7 +324,6 @@
       text-shadow: 0 10px 22px rgba(0,0,0,.35);
     }
 
-    /* ===== Group picker ===== */
     .pickRow{
       margin-bottom: 10px;
       padding: 10px;
@@ -369,7 +357,6 @@
       color: var(--gold);
     }
 
-    /* ===== Left Drawer ===== */
     .drawer{
       position: fixed;
       top: 0;
@@ -488,7 +475,6 @@
       .leaflet-popup{ margin-top: calc(10px + env(safe-area-inset-top)); }
     }
 
-    /* ===== Coords floating button ===== */
     .fab{
       position: fixed;
       right: calc(12px + env(safe-area-inset-right));
@@ -503,7 +489,6 @@
       min-width: 0;
     }
 
-    /* ===== Access Modal (Коники) ===== */
     .accessModal{
       position: fixed;
       inset: 0;
@@ -616,13 +601,6 @@
       font-weight: 1000;
       cursor: pointer;
     }
-
-    .accessHint{
-      margin-top: 10px;
-      opacity: .85;
-      font-weight: 800;
-      font-size: 13px;
-    }
   </style>
 </head>
 
@@ -665,14 +643,10 @@
         <span class="accessEmail">ПОШТА_ТУТ</span>
       </div>
 
-      <div class="accessHint">
-        Введи код → фронт відправить його на сервер → сервер перевірить у KV та видасть токен доступу.
-      </div>
-
       <label class="accessLabel" for="accessCode">Код</label>
       <input class="accessInput" id="accessCode" autocomplete="off" inputmode="latin" />
 
-      <div class="accessError" id="accessError">Невірний код або помилка сервера.</div>
+      <div class="accessError" id="accessError">Код невірний або уже використаний.</div>
 
       <div class="accessBtns">
         <button class="accessBtnPrimary" id="accessSubmit" type="button">Відкрити</button>
@@ -682,18 +656,9 @@
   </div>
 
   <script>
-    // ==========================================================
-    //  API (KV/Worker)
-    //  Якщо API на іншому домені — впиши сюди:
-    //  const API_BASE = "https://shiny-mud-0b7d.yurromanow.workers.dev";
-    //  Якщо API на цьому ж домені — лишай порожнє:
-    // ==========================================================
-    const API_BASE = "https://shiny-mud-0b7d.yurromanow.workers.dev";
-
-    const API = {
-      status: (token) => `${API_BASE}/api/status?token=${encodeURIComponent(token)}`,
-      unlock: () => `${API_BASE}/api/unlock`,
-    };
+    // ===== CONFIG =====
+    const API_BASE = "https://shiny-mud-0b7d.yurromanow.workers.dev"; // твій worker
+    const TOKEN_KEY = "horsesToken";
 
     // ===== PATH (GitHub Pages safe) =====
     const basePath = location.pathname.endsWith("/")
@@ -846,6 +811,10 @@
       .replaceAll("<","&lt;")
       .replaceAll(">","&gt;")
       .replaceAll('"',"&quot;");
+
+    function normalizeCode(s){
+      return String(s || "").trim().toUpperCase().replace(/\s+/g, "");
+    }
 
     function resolveUrl(u){
       const s = String(u || "").trim();
@@ -1007,63 +976,39 @@
     };
     updateCoordsBtn();
 
-    // ===== ACCESS (KV) =====
-    const HORSES_TOKEN_KEY = "horsesToken";
-
-    const HORSES_ACCESS = {
-      unlocked: false,
-      token: localStorage.getItem(HORSES_TOKEN_KEY) || "",
-    };
-
-    function normalizeCode(s){
-      return String(s || "").trim().toUpperCase().replace(/\s+/g, "");
-    }
-
-    async function refreshHorsesAccess(){
-      if (!HORSES_ACCESS.token){
-        HORSES_ACCESS.unlocked = false;
-        return false;
-      }
-      try{
-        const r = await fetch(API.status(HORSES_ACCESS.token), { method: "GET", cache: "no-store" });
-        const j = await r.json().catch(() => ({}));
-        HORSES_ACCESS.unlocked = !!j.ok;
-        if (!HORSES_ACCESS.unlocked){
-          HORSES_ACCESS.token = "";
-          localStorage.removeItem(HORSES_TOKEN_KEY);
-        }
-        return HORSES_ACCESS.unlocked;
-      }catch(e){
-        HORSES_ACCESS.unlocked = false;
-        return false;
-      }
-    }
-
-    async function unlockWithCode(code){
-      try{
-        const r = await fetch(API.unlock(), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code }),
-        });
-        const j = await r.json().catch(() => ({}));
-        if (!r.ok || !j.ok || !j.token) return { ok:false, error: j.error || "unlock_failed" };
-        HORSES_ACCESS.token = String(j.token);
-        localStorage.setItem(HORSES_TOKEN_KEY, HORSES_ACCESS.token);
-        HORSES_ACCESS.unlocked = true;
-        return { ok:true };
-      }catch(e){
-        return { ok:false, error:"network" };
-      }
-    }
-
     // ===== PRELOAD MAP =====
     const preload = new Image();
     preload.onload = () => initMap(preload.width, preload.height);
     preload.onerror = () => alert("Не можу завантажити map.jpg. Перевір файл map.jpg поруч з index.html");
     preload.src = MAP_URL;
 
-    async function initMap(MAP_WIDTH, MAP_HEIGHT){
+    async function hasHorseAccess(){
+      const token = localStorage.getItem(TOKEN_KEY) || "";
+      if (!token) return false;
+      try{
+        const r = await fetch(`${API_BASE}/api/status?token=${encodeURIComponent(token)}`);
+        const j = await r.json();
+        return !!j?.ok;
+      }catch{
+        return false;
+      }
+    }
+
+    async function unlockWithCode(code){
+      const r = await fetch(`${API_BASE}/api/unlock`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (j?.ok && j?.token){
+        localStorage.setItem(TOKEN_KEY, j.token);
+        return { ok:true };
+      }
+      return { ok:false, error: j?.error || "server_error" };
+    }
+
+    function initMap(MAP_WIDTH, MAP_HEIGHT){
       const map = L.map('map', {
         crs: L.CRS.Simple,
         minZoom: -2,
@@ -1095,7 +1040,6 @@
       const markersByWagonGroupIndex = new Map();
       const markersByHorseGroupIndex = new Map();
 
-      // ===== WAGONS popups =====
       function openWagonGroupPopup(groupIndex, activeId, photoIndex = 0){
         const g = GROUPS[groupIndex];
         const marker = markersByWagonGroupIndex.get(groupIndex);
@@ -1177,7 +1121,6 @@
         marker.on("click", () => openWagonGroupPopup(idx, g.ids[0], 0));
       });
 
-      // ===== HORSES popups =====
       function openHorseGroupPopup(groupIndex, activeId, photoIndex = 0){
         const g = HORSE_GROUPS[groupIndex];
         const marker = markersByHorseGroupIndex.get(groupIndex);
@@ -1259,7 +1202,6 @@
         marker.on("click", () => openHorseGroupPopup(idx, g.ids[0], 0));
       });
 
-      // ===== Drawer render =====
       function renderDrawer(){
         if (currentMode === "wagons"){
           drawerTitleEl.textContent = "Список повозок";
@@ -1306,8 +1248,8 @@
               map.panTo([g.y, g.x], { animate: true, duration: 0.35 });
               setTimeout(() => openWagonGroupPopup(groupIndex, id, 0), 220);
             } else {
-              await refreshHorsesAccess();
-              if (!HORSES_ACCESS.unlocked){
+              const ok = await hasHorseAccess();
+              if (!ok){
                 showAccessModal();
                 return;
               }
@@ -1355,6 +1297,7 @@
         accessError.style.display = "none";
         const code = normalizeCode(accessCode.value);
         if (!code){
+          accessError.textContent = "Введи код.";
           accessError.style.display = "block";
           return;
         }
@@ -1363,9 +1306,17 @@
         if (res.ok){
           hideAccessModal();
           applyMode();
-        } else {
-          accessError.style.display = "block";
+          return;
         }
+
+        if (res.error === "invalid_code" || res.error === "used_code"){
+          accessError.textContent = "Код невірний або уже використаний.";
+          accessError.style.display = "block";
+          return;
+        }
+
+        accessError.textContent = "Помилка сервера. Спробуй ще раз.";
+        accessError.style.display = "block";
       };
 
       accessModal.addEventListener("click", (e) => {
@@ -1379,8 +1330,8 @@
         map.closePopup();
 
         if (currentMode === "horses"){
-          await refreshHorsesAccess();
-          if (!HORSES_ACCESS.unlocked){
+          const ok = await hasHorseAccess();
+          if (!ok){
             showAccessModal();
             return;
           }
@@ -1404,9 +1355,7 @@
         await applyMode();
       };
 
-      // старт: перевіряємо токен один раз
-      await refreshHorsesAccess();
-      await applyMode();
+      applyMode();
 
       map.on('click', (e) => {
         if (!coordsEnabled) return;
