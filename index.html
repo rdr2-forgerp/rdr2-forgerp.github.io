@@ -409,11 +409,12 @@
       gap: 10px;
     }
 
+    /* UPDATED: drawer rows now include thumbnail */
     .wagonRow{
       background: rgba(255,255,255,.06);
       border: 1px solid rgba(255,255,255,.10);
       border-radius: 16px;
-      padding: 12px;
+      padding: 10px;
       color: var(--text);
       display:flex;
       align-items:center;
@@ -426,13 +427,33 @@
 
     .wagonLeft{
       display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .thumb{
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      flex: 0 0 auto;
+      box-shadow: 0 10px 20px rgba(0,0,0,.22);
+    }
+
+    .wagonText{
+      display:flex;
       flex-direction: column;
       gap: 4px;
       min-width: 0;
     }
+
     .wagonMain{
       font-weight: 1000;
-      font-size: 18px;
+      font-size: 16px;
       line-height: 1.1;
       white-space: nowrap;
       overflow: hidden;
@@ -441,7 +462,7 @@
     .wagonSub{
       opacity: .85;
       font-weight: 800;
-      font-size: 13px;
+      font-size: 12px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -454,7 +475,8 @@
       background: rgba(0,0,0,.18);
       color: var(--gold);
       font-weight: 1000;
-      font-size: 18px;
+      font-size: 16px;
+      white-space: nowrap;
     }
 
     .scrim{
@@ -473,6 +495,9 @@
 
     @media (max-width: 720px){
       .leaflet-popup{ margin-top: calc(10px + env(safe-area-inset-top)); }
+      .thumb{ width: 50px; height: 50px; border-radius: 12px; }
+      .wagonMain{ font-size: 15px; }
+      .pricePill{ font-size: 15px; padding: 9px 11px; }
     }
 
     .fab{
@@ -702,8 +727,6 @@
     ].map(w => ({ ...w, city: cityById(w.id) }));
 
     // ===== DATA (HORSES) =====
-    // Короткий індивідуальний опис для КОЖНОГО коня (1–60)
-    // Бідося (#24) — НЕ змінюємо
     const HORSE_DESC_BY_ID = {
       1:"Спритний і різкий: любить повороти й швидкі ривки.",
       2:"Тихий, але з характером — стартує без попереджень.",
@@ -711,19 +734,16 @@
       4:"Живий та маневрений — ідеально для вузьких місць.",
       5:"Надійний темп: тримає швидкість без нервів.",
       6:"Погоня — його стихія: витягує, коли треба дотиснути.",
-
       7:"Сила в копитах: прет як таран і не зупиняється.",
       8:"Сталеві нерви: спокійний під тиском.",
       9:"Міцний і слухняний: контроль понад усе.",
       10:"Важкий корпус, але розгін приємно дивує.",
       11:"Бульдозер: вивозить будь-яку суєту.",
       12:"Робочий звір: простий, але дуже витривалий.",
-
       13:"Спокійний боєць: не метушиться, просто робить роботу.",
       14:"Великий запас сил: впевнено тримає дистанцію.",
       15:"Стійкий під вогнем: не ламається у хаосі.",
       16:"Здоров’я на максимум: витягує складні моменти.",
-
       17:"Швидкий і гордий: любить прямі та простір.",
       18:"Ефектний і прудкий: стиль + темп.",
       19:"Зібраний хижак: м’яко тримає швидкість у погоні.",
@@ -731,15 +751,12 @@
       21:"Чорний ривок: різкий старт і точні гальма.",
       22:"Срібний спринтер: легкий, маневрений, слухняний.",
       23:"Світлий аристократ: дисципліна і чистий хід.",
-
       24:"Кляча-легенда: їде, страждає і робить вигляд, що так і треба.",
-
       25:"Юркий компаньйон: для щоденної їзди без зайвого.",
       26:"Спокійний характер: не шукає пригод, але витримає все.",
       27:"Простий і надійний: сідаєш — і поїхав.",
       28:"Рівний як лінійка: мінімум сюрпризів, максимум стабільності.",
       29:"Плавна хода: приємний для довгих прогулянок.",
-
       30:"Комфорт-режим: м’який хід на далекі поїздки.",
       31:"Спокійний турист: економить сили і нерви.",
       32:"Баланс і керованість: легко тримає траєкторію.",
@@ -747,31 +764,24 @@
       34:"Красивий і зручний: їдеш — і кайфуєш.",
       35:"Темп під контролем: тримає ритм без провалів.",
       36:"Надійний ходок: довга дорога — його робота.",
-
       37:"Холодний спокій: дуже “стедді” і дисциплінований.",
       38:"Світлий і рідкісний: м’який хід, сильний характер.",
       39:"Комфортний велетень: спина міцна, рух плавний.",
       40:"Універсал: не випендрюється, але завжди виручає.",
       41:"Зібраний і витривалий: під будь-яку задачу.",
       42:"Білий монумент: поважний, спокійний, впевнений.",
-
       43:"Компактний боєць: сміливий і слухняний.",
       44:"Впертий, але надійний: з часом стає “своїм”.",
       45:"Елегантний воїн: швидка реакція і стабільність.",
-
       46:"Важка артилерія: тягне ситуацію, коли все погано.",
       47:"Сіра фортеця: сміливість і витривалість без компромісів.",
       48:"Суцільна тяга: сильний, міцний, не боїться бруду.",
-
-      // NEW: Gypsy Cob (49–54) — локація як у 3-го візка
       49:"Циганський красень: м’яко котиться й тримає стиль.",
       50:"Слухняний і розумний: любить спокійний контроль.",
       51:"Міцний як домкрат: впевненість у кожному кроці.",
       52:"Легкий на хід: комфортний без зайвих вибриків.",
       53:"Грайливий, але керований: швидко звикає до вершника.",
       54:"Білий бос: вигляд люкс, характер залізний.",
-
-      // NEW: Arabian (55–60) — локація як у 1-го візка
       55:"Чорна блискавка: швидкість і різкість у чистому вигляді.",
       56:"Сірий спринтер: легкий, маневрений, дуже живий.",
       57:"Рудий заряд: розганяється швидко й тримає темп.",
@@ -780,7 +790,6 @@
       60:"Смугастий рідкісний: виділяється і летить, як вітер."
     };
 
-    // Можна лишити як запасний фолбек (але в нас тепер є індивідуальні описи)
     const BREED_DESC = {
       "Criollo": "Малий і розумний мультиклас: швидкий, витривалий, дуже спритний.",
       "Breton": "Міцний і м’язистий мультиклас: добре тримає темп у бою та в погонях.",
@@ -803,19 +812,16 @@
       { id: 4,  breed: "Criollo", coat: "Grillo marble sabino",  price: 800  },
       { id: 5,  breed: "Criollo", coat: "Grillo sorrel overo",   price: 1000 },
       { id: 6,  breed: "Criollo", coat: "Grillo bay brindle",    price: 950  },
-
       { id: 7,  breed: "Breton", coat: "Sorrel",              price: 2350 },
       { id: 8,  breed: "Breton", coat: "Steel grey",          price: 2400 },
       { id: 9,  breed: "Breton", coat: "Grullo dun",          price: 2300 },
       { id: 10, breed: "Breton", coat: "Mealy dapple bay",    price: 2450 },
       { id: 11, breed: "Breton", coat: "Seal brown",          price: 2500 },
       { id: 12, breed: "Breton", coat: "Red roan",            price: 2250 },
-
       { id: 13, breed: "Hungarian Halfbred", coat: "Piebald tobiano",     price: 1800 },
       { id: 14, breed: "Hungarian Halfbred", coat: "Liver chestnut",      price: 1850 },
       { id: 15, breed: "Hungarian Halfbred", coat: "Flaxen chestnut",     price: 1750 },
       { id: 16, breed: "Hungarian Halfbred", coat: "Dark dapple grey",    price: 1700 },
-
       { id: 17, breed: "Turkoman", coat: "Grey",     price: 1950 },
       { id: 18, breed: "Turkoman", coat: "Gold",     price: 2200 },
       { id: 19, breed: "Turkoman", coat: "Dark bay", price: 2050 },
@@ -823,15 +829,12 @@
       { id: 21, breed: "Turkoman", coat: "Black",    price: 2100 },
       { id: 22, breed: "Turkoman", coat: "Silver",   price: 2000 },
       { id: 23, breed: "Turkoman", coat: "Perlino",  price: 1900 },
-
       { id: 24, breed: "Перша", coat: "Бідося",        price: 30 },
-
       { id: 25, breed: "Morgan", coat: "Palomino",        price: 150 },
       { id: 26, breed: "Morgan", coat: "Liver chestnut",  price: 175 },
       { id: 27, breed: "Morgan", coat: "Flaxen chestnut", price: 150 },
       { id: 28, breed: "Morgan", coat: "Bay",             price: 145 },
       { id: 29, breed: "Morgan", coat: "Bay roan",        price: 125 },
-
       { id: 30, breed: "Tennessee Walker", coat: "Black rabicano",   price: 450 },
       { id: 31, breed: "Tennessee Walker", coat: "Chestnut",         price: 400 },
       { id: 32, breed: "Tennessee Walker", coat: "Dapple bay",       price: 425 },
@@ -839,31 +842,24 @@
       { id: 34, breed: "Tennessee Walker", coat: "Gold palomino",    price: 425 },
       { id: 35, breed: "Tennessee Walker", coat: "Mahogany",         price: 440 },
       { id: 36, breed: "Tennessee Walker", coat: "Red roan",         price: 380 },
-
       { id: 37, breed: "Kladruber", coat: "Black",             price: 1650 },
       { id: 38, breed: "Kladruber", coat: "Cremello",          price: 1400 },
       { id: 39, breed: "Kladruber", coat: "Dapple rose grey",  price: 1500 },
       { id: 40, breed: "Kladruber", coat: "Grey",              price: 1450 },
       { id: 41, breed: "Kladruber", coat: "Silver",            price: 1550 },
       { id: 42, breed: "Kladruber", coat: "White",             price: 1600 },
-
       { id: 43, breed: "Andalusian", coat: "Dark bay",       price: 1200 },
       { id: 44, breed: "Andalusian", coat: "Perlino",        price: 1150 },
       { id: 45, breed: "Andalusian", coat: "Rose grey",      price: 1100 },
-
       { id: 46, breed: "Ardennes",   coat: "Bay roan",        price: 1300 },
       { id: 47, breed: "Ardennes",   coat: "Iron grey",       price: 1350 },
       { id: 48, breed: "Ardennes",   coat: "Strawberry roan", price: 1250 },
-
-      // ===== NEW (Gypsy Cob) — локація як у 3-го візка =====
       { id: 49, breed: "Gypsy Cob", coat: "splashed bay",        price: 700 },
       { id: 50, breed: "Gypsy Cob", coat: "skewbald",            price: 650 },
       { id: 51, breed: "Gypsy Cob", coat: "piebald",             price: 650 },
       { id: 52, breed: "Gypsy Cob", coat: "palomino blagdon",    price: 550 },
       { id: 53, breed: "Gypsy Cob", coat: "splashed piebald",    price: 600 },
       { id: 54, breed: "Gypsy Cob", coat: "white blagdon",       price: 750 },
-
-      // ===== NEW (Arabian) — локація як у 1-го візка =====
       { id: 55, breed: "Arabian", coat: "black",           price: 2950 },
       { id: 56, breed: "Arabian", coat: "grey",            price: 2800 },
       { id: 57, breed: "Arabian", coat: "red chestnut",    price: 2900 },
@@ -874,14 +870,10 @@
       ...h,
       title: `Кінь - ${h.id}`,
       fullName: `${h.breed} ${h.coat}`.trim(),
-      // Індивідуальний опис (основний). Бідося (#24) тут теж забирається з HORSE_DESC_BY_ID.
       desc: HORSE_DESC_BY_ID[h.id] || BREED_DESC[h.breed] || "Кляча з великим серцем і нульовими амбіціями.",
       photos: [`H${h.id}.jpg`]
     }));
 
-    // Групи коней (додано 49–54 і 55–60)
-    // 49–54: локація як у 3-го візка -> x:1621 y:989
-    // 55–60: локація як у 1-го візка -> x:1874 y:747
     const HORSE_GROUPS = [
       { ids: [1,2,3,4,5,6],               x: 1965, y: 1183 },
       { ids: [7,8,9,10,11,12],            x: 1132, y: 1493 },
@@ -889,13 +881,10 @@
       { ids: [24,25,26,27,28,29,30,31,32,33,34,35,36],     x: 1311, y: 1180 },
       { ids: [37,38,39,40,41,42],         x: 1038, y: 920  },
       { ids: [43,44,45,46,47,48],         x: 1221, y: 763  },
-
-      // NEW groups:
-      { ids: [49,50,51,52,53,54],         x: 1621, y: 989  }, // як у 3-го візка
-      { ids: [55,56,57,58,59,60],         x: 1874, y: 747  }, // як у 1-го візка
+      { ids: [49,50,51,52,53,54],         x: 1621, y: 989  },
+      { ids: [55,56,57,58,59,60],         x: 1874, y: 747  },
     ];
 
-    // ГРУПИ повозок
     const GROUPS = [
       { ids: [1],        x: 1874, y: 747  },
       { ids: [2],        x: 1969, y: 1182 },
@@ -1310,35 +1299,55 @@
         marker.on("click", () => openHorseGroupPopup(idx, g.ids[0], 0));
       });
 
+      // ===== UPDATED: drawer now shows thumbnails
+      function firstPhotoUrl(item, fallbackUrl){
+        const raw = (item?.photos && item.photos.length) ? item.photos[0] : "";
+        const u = resolveUrl(raw);
+        return u || fallbackUrl;
+      }
+
       function renderDrawer(){
         if (currentMode === "wagons"){
           drawerTitleEl.textContent = "Список повозок";
           drawerList.innerHTML = WAGONS_DATA
             .slice()
             .sort((a,b) => a.id - b.id)
-            .map(w => `
-              <div class="wagonRow" data-type="wagon" data-id="${w.id}">
-                <div class="wagonLeft">
-                  <div class="wagonMain">#${w.id} — ${esc(w.title || "Возик")}</div>
-                  <div class="wagonSub">${esc(w.city || "")}</div>
+            .map(w => {
+              const thumb = firstPhotoUrl(w, WAGON_URL);
+              return `
+                <div class="wagonRow" data-type="wagon" data-id="${w.id}">
+                  <div class="wagonLeft">
+                    <img class="thumb" src="${thumb}" alt="W${w.id}" onerror="this.src='${WAGON_URL}'">
+                    <div class="wagonText">
+                      <div class="wagonMain">#${w.id} — ${esc(w.title || "Возик")}</div>
+                      <div class="wagonSub">${esc(w.city || "")}</div>
+                    </div>
+                  </div>
+                  <div class="pricePill">${fmtPriceDot(w.price)} $</div>
                 </div>
-                <div class="pricePill">${fmtPriceDot(w.price)} $</div>
-              </div>
-            `).join("");
+              `;
+            }).join("");
         } else {
           drawerTitleEl.textContent = "Список коників";
+          // ✅ SORT: від малої ціни до більшої
           drawerList.innerHTML = HORSES_DATA
             .slice()
-            .sort((a,b) => a.id - b.id)
-            .map(h => `
-              <div class="wagonRow" data-type="horse" data-id="${h.id}">
-                <div class="wagonLeft">
-                  <div class="wagonMain">#${h.id} — ${esc(h.fullName || "Кінь")}</div>
-                  <div class="wagonSub">${esc(h.breed || "")}</div>
+            .sort((a,b) => (a.price - b.price) || (a.id - b.id))
+            .map(h => {
+              const thumb = firstPhotoUrl(h, HORSE_URL);
+              return `
+                <div class="wagonRow" data-type="horse" data-id="${h.id}">
+                  <div class="wagonLeft">
+                    <img class="thumb" src="${thumb}" alt="H${h.id}" onerror="this.src='${HORSE_URL}'">
+                    <div class="wagonText">
+                      <div class="wagonMain">#${h.id} — ${esc(h.fullName || "Кінь")}</div>
+                      <div class="wagonSub">${esc(h.breed || "")}</div>
+                    </div>
+                  </div>
+                  <div class="pricePill">${fmtPriceDot(h.price)} $</div>
                 </div>
-                <div class="pricePill">${fmtPriceDot(h.price)} $</div>
-              </div>
-            `).join("");
+              `;
+            }).join("");
         }
 
         drawerList.querySelectorAll(".wagonRow").forEach(row => {
