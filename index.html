@@ -1499,7 +1499,7 @@ const HOUSE_GROUPS = [
       HOUSE_GROUPS.forEach((g, idx) => {
         const icon = L.divIcon({
           className: "",
-          html: markerHtml(groupLabel(g.ids), HOUSE_URL),
+          html: markerHtml(groupLabel(g.ids), HOUSE_URL, "🏠"),
           iconSize: [44, 44],
           iconAnchor: [0, 0]
         });
