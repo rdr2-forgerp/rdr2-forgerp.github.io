@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>RDR2 — Повозки / Коники</title>
+  <title>RDR2 — Повозки / Коники / Будинки</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -77,6 +77,11 @@
       white-space: nowrap;
     }
     .btn:hover{ background: rgba(35,24,14,.98); }
+    .btn.active{
+      background: rgba(255,255,255,.14);
+      border-color: rgba(255,255,255,.22);
+      color: var(--gold);
+    }
 
     .btnSmall{ min-width: 118px; }
 
@@ -409,7 +414,6 @@
       gap: 10px;
     }
 
-    /* UPDATED: drawer rows now include thumbnail */
     .wagonRow{
       background: rgba(255,255,255,.06);
       border: 1px solid rgba(255,255,255,.10);
@@ -643,7 +647,9 @@
   <!-- TOP BAR -->
   <div class="topBar">
     <button class="btn btnSmall" id="listBtn" type="button">☰ Список</button>
-    <button class="btn btnSmall" id="toggleBtn" type="button">🐎 Коники</button>
+    <button class="btn btnSmall" id="wagonsBtn" type="button">🛒 Повозки</button>
+    <button class="btn btnSmall" id="horsesBtn" type="button">🐎 Коники</button>
+    <button class="btn btnSmall" id="housesBtn" type="button">🏠 Будинки</button>
     <button class="btn btnSmall" id="reloadBtn" type="button">⟳ Оновити</button>
   </div>
 
@@ -694,6 +700,7 @@
     const MAP_URL   = basePath + "map.jpg"   + bust;
     const WAGON_URL = basePath + "wagon.png" + bust;
     const HORSE_URL = basePath + "horse.png" + bust;
+    const HOUSE_URL = basePath + "house.png" + bust; // <-- додай house.png поруч з index.html
 
     // ===== DATA (WAGONS) =====
     function cityById(id){
@@ -874,6 +881,22 @@
       photos: [`H${h.id}.jpg`]
     }));
 
+    // ===== DATA (HOUSES) =====
+    // ФОТО: вигляд = houses/D1.jpg, площа = houses/D1-1.jpg
+    // Поки що тут приклади. Потім просто додаєш нові будинки у масив.
+    const HOUSES_DATA = [
+      { id: 1, title: "Будинок", price: 10000, area: "—", photos: ["houses/D1.jpg", "houses/D1-1.jpg"] },
+      { id: 2, title: "Будинок", price: 15000, area: "—", photos: ["houses/D2.jpg", "houses/D2-1.jpg"] },
+      { id: 3, title: "Будинок", price: 12000, area: "—", photos: ["houses/D3.jpg", "houses/D3-1.jpg"] },
+    ];
+
+    // Координати маркерів будинків на карті (X, Y) — ти потім підставиш точні
+    const HOUSE_GROUPS = [
+      { ids: [1], x: 1621, y: 989  },
+      { ids: [2], x: 1315, y: 1181 },
+      { ids: [3], x: 1129, y: 1491 },
+    ];
+
     const HORSE_GROUPS = [
       { ids: [1,2,3,4,5,6],               x: 1965, y: 1183 },
       { ids: [7,8,9,10,11,12],            x: 1132, y: 1493 },
@@ -958,6 +981,7 @@
       `;
     }
 
+    // ===== Cards: Wagons =====
     function cardHtml(w, photoIndex){
       const rawPhotos = (w.photos && w.photos.length) ? w.photos : ["wagon.png"];
       const photos = rawPhotos.map(resolveUrl).filter(Boolean);
@@ -1000,6 +1024,7 @@
       return raw.replace(`<div class="rdrBody">`, `<div class="rdrBody">${groupHeaderHtml(groupIds, activeId, "Вибери повозку:")}`);
     }
 
+    // ===== Cards: Horses =====
     function horseCardHtml(h, photoIndex){
       const rawPhotos = (h.photos && h.photos.length) ? h.photos : ["horse.png"];
       const photos = rawPhotos.map(resolveUrl).filter(Boolean);
@@ -1036,6 +1061,48 @@
       if (!h) return "";
       const raw = horseCardHtml(h, photoIndex);
       return raw.replace(`<div class="rdrBody">`, `<div class="rdrBody">${groupHeaderHtml(groupIds, activeId, "Вибери коника:")}`);
+    }
+
+    // ===== Cards: Houses =====
+    // Кнопки: "Вигляд" (D1.jpg) і "Площа" (D1-1.jpg)
+    function houseCardHtml(d, photoIndex){
+      const rawPhotos = (d.photos && d.photos.length) ? d.photos : ["house.png"];
+      const photos = rawPhotos.map(resolveUrl).filter(Boolean);
+      const idx = Math.max(0, Math.min(photoIndex ?? 0, photos.length-1));
+      const src = photos[idx] || HOUSE_URL;
+
+      return `
+        <div class="rdrCard" data-did="${d.id}" data-idx="${idx}">
+          <div class="rdrTop">
+            <img class="rdrImg" src="${src}" alt="photo">
+            <button class="rdrClose" data-action="close" type="button">×</button>
+            ${photos.length>1 ? renderDots(photos.length, idx) : ``}
+          </div>
+          <div class="rdrBody">
+            <div class="titleRow">
+              <div class="name">${esc(d.title || "Будинок")}</div>
+              <div class="idPill">#${d.id}</div>
+            </div>
+
+            <div class="pickRow">
+              <div class="pickTitle">Фото</div>
+              <div class="pickBtns">
+                <button class="pickBtn ${idx===0 ? "active":""}" data-photo="0" type="button">Вигляд</button>
+                <button class="pickBtn ${idx===1 ? "active":""}" data-photo="1" type="button">Площа</button>
+              </div>
+            </div>
+
+            <div class="statsGrid">
+              <div class="stat"><div class="label">Площа</div><div class="value">${esc(d.area || "—")}</div></div>
+            </div>
+
+            <div class="priceRow">
+              <span class="priceLabel">Ціна</span>
+              <span class="priceValue">${fmtPriceDot(d.price)} $</span>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     // ===== Drawer =====
@@ -1124,8 +1191,10 @@
 
       const wagonsLayer = L.layerGroup().addTo(map);
       const horsesLayer = L.layerGroup();
+      const housesLayer = L.layerGroup();
       let currentMode = "wagons";
 
+      // ===== indexes =====
       const wagonById = new Map(WAGONS_DATA.map(w => [w.id, w]));
       const groupByWagonId = new Map();
       GROUPS.forEach((g, idx) => g.ids.forEach(id => groupByWagonId.set(id, idx)));
@@ -1134,9 +1203,15 @@
       const groupByHorseId = new Map();
       HORSE_GROUPS.forEach((g, idx) => g.ids.forEach(id => groupByHorseId.set(id, idx)));
 
+      const houseById = new Map(HOUSES_DATA.map(d => [d.id, d]));
+      const groupByHouseId = new Map();
+      HOUSE_GROUPS.forEach((g, idx) => g.ids.forEach(id => groupByHouseId.set(id, idx)));
+
       const markersByWagonGroupIndex = new Map();
       const markersByHorseGroupIndex = new Map();
+      const markersByHouseGroupIndex = new Map();
 
+      // ===== Wagons popups =====
       function openWagonGroupPopup(groupIndex, activeId, photoIndex = 0){
         const g = GROUPS[groupIndex];
         const marker = markersByWagonGroupIndex.get(groupIndex);
@@ -1218,6 +1293,7 @@
         marker.on("click", () => openWagonGroupPopup(idx, g.ids[0], 0));
       });
 
+      // ===== Horses popups =====
       function openHorseGroupPopup(groupIndex, activeId, photoIndex = 0){
         const g = HORSE_GROUPS[groupIndex];
         const marker = markersByHorseGroupIndex.get(groupIndex);
@@ -1296,17 +1372,82 @@
 
         const marker = L.marker([g.y, g.x], { icon, draggable: false, keyboard: false }).addTo(horsesLayer);
         markersByHorseGroupIndex.set(idx, marker);
-        marker.on("click", () => openHorseGroupPopup(idx, g.ids[0], 0));
+        marker.on("click", async () => {
+          const ok = await hasHorseAccess();
+          if (!ok){
+            showAccessModal("horses");
+            return;
+          }
+          openHorseGroupPopup(idx, g.ids[0], 0);
+        });
       });
 
-      // ===== UPDATED: drawer now shows thumbnails
+      // ===== Houses popups =====
+      function openHousePopup(groupIndex, activeId, photoIndex = 0){
+        const g = HOUSE_GROUPS[groupIndex];
+        const marker = markersByHouseGroupIndex.get(groupIndex);
+        if (!g || !marker) return;
+
+        const d = houseById.get(activeId);
+        if (!d) return;
+
+        marker.bindPopup(houseCardHtml(d, photoIndex), {
+          closeButton: false,
+          maxWidth: 600,
+          autoPan: true,
+          keepInView: true,
+          autoPanPaddingTopLeft: [14, 110],
+          autoPanPaddingBottomRight: [14, 14],
+          className: "rdrPopup"
+        }).openPopup();
+
+        setTimeout(() => bindHousePopup(activeId, groupIndex, marker), 0);
+      }
+
+      function bindHousePopup(activeId, groupIndex, marker){
+        const root = document.querySelector(`.rdrCard[data-did="${activeId}"]`);
+        if (!root) return;
+
+        L.DomEvent.disableClickPropagation(root);
+        L.DomEvent.disableScrollPropagation(root);
+
+        const imgEl = root.querySelector(".rdrImg");
+        if (imgEl) imgEl.onerror = () => { imgEl.src = HOUSE_URL; };
+
+        const closeBtn = root.querySelector('[data-action="close"]');
+        if (closeBtn) closeBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); marker.closePopup(); };
+
+        root.querySelectorAll("[data-photo]").forEach(btn => {
+          btn.onclick = (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const idx = parseInt(btn.getAttribute("data-photo"), 10);
+            if (!Number.isFinite(idx)) return;
+            openHousePopup(groupIndex, activeId, idx);
+          };
+        });
+      }
+
+      HOUSE_GROUPS.forEach((g, idx) => {
+        const icon = L.divIcon({
+          className: "",
+          html: markerHtml(groupLabel(g.ids), HOUSE_URL),
+          iconSize: [44, 44],
+          iconAnchor: [0, 0]
+        });
+
+        const marker = L.marker([g.y, g.x], { icon, draggable: false, keyboard: false }).addTo(housesLayer);
+        markersByHouseGroupIndex.set(idx, marker);
+        marker.on("click", () => openHousePopup(idx, g.ids[0], 0));
+      });
+
+      // ===== Drawer thumbs =====
       function firstPhotoUrl(item, fallbackUrl){
         const raw = (item?.photos && item.photos.length) ? item.photos[0] : "";
         const u = resolveUrl(raw);
         return u || fallbackUrl;
       }
 
-      function renderDrawer(){
+      async function renderDrawer(){
         if (currentMode === "wagons"){
           drawerTitleEl.textContent = "Список повозок";
           drawerList.innerHTML = WAGONS_DATA
@@ -1327,9 +1468,9 @@
                 </div>
               `;
             }).join("");
-        } else {
+
+        } else if (currentMode === "horses"){
           drawerTitleEl.textContent = "Список коників";
-          // ✅ SORT: від малої ціни до більшої
           drawerList.innerHTML = HORSES_DATA
             .slice()
             .sort((a,b) => (a.price - b.price) || (a.id - b.id))
@@ -1345,6 +1486,27 @@
                     </div>
                   </div>
                   <div class="pricePill">${fmtPriceDot(h.price)} $</div>
+                </div>
+              `;
+            }).join("");
+
+        } else { // houses
+          drawerTitleEl.textContent = "Список будинків";
+          drawerList.innerHTML = HOUSES_DATA
+            .slice()
+            .sort((a,b) => (a.id - b.id))
+            .map(d => {
+              const thumb = firstPhotoUrl(d, HOUSE_URL);
+              return `
+                <div class="wagonRow" data-type="house" data-id="${d.id}">
+                  <div class="wagonLeft">
+                    <img class="thumb" src="${thumb}" alt="D${d.id}" onerror="this.src='${HOUSE_URL}'">
+                    <div class="wagonText">
+                      <div class="wagonMain">#${d.id} — ${esc(d.title || "Будинок")}</div>
+                      <div class="wagonSub">${esc(d.area || "")}</div>
+                    </div>
+                  </div>
+                  <div class="pricePill">${fmtPriceDot(d.price)} $</div>
                 </div>
               `;
             }).join("");
@@ -1364,10 +1526,11 @@
               const g = GROUPS[groupIndex];
               map.panTo([g.y, g.x], { animate: true, duration: 0.35 });
               setTimeout(() => openWagonGroupPopup(groupIndex, id, 0), 220);
-            } else {
+
+            } else if (type === "horse"){
               const ok = await hasHorseAccess();
               if (!ok){
-                showAccessModal();
+                showAccessModal("horses");
                 return;
               }
               const groupIndex = groupByHorseId.get(id);
@@ -1375,13 +1538,19 @@
               const g = HORSE_GROUPS[groupIndex];
               map.panTo([g.y, g.x], { animate: true, duration: 0.35 });
               setTimeout(() => openHorseGroupPopup(groupIndex, id, 0), 220);
+
+            } else { // house
+              const groupIndex = groupByHouseId.get(id);
+              if (groupIndex == null) return;
+              const g = HOUSE_GROUPS[groupIndex];
+              map.panTo([g.y, g.x], { animate: true, duration: 0.35 });
+              setTimeout(() => openHousePopup(groupIndex, id, 0), 220);
             }
           };
         });
       }
 
-      const toggleBtn = document.getElementById("toggleBtn");
-
+      // ===== Access Modal (for horses only) =====
       const accessModal  = document.getElementById("accessModal");
       const accessClose  = document.getElementById("accessClose");
       const accessCancel = document.getElementById("accessCancel");
@@ -1389,7 +1558,10 @@
       const accessCode   = document.getElementById("accessCode");
       const accessError  = document.getElementById("accessError");
 
-      function showAccessModal(){
+      let accessReturnMode = "wagons";
+
+      function showAccessModal(returnMode){
+        accessReturnMode = returnMode || "wagons";
         accessError.style.display = "none";
         accessCode.value = "";
         accessModal.style.display = "flex";
@@ -1398,13 +1570,13 @@
       function hideAccessModal(){
         accessModal.style.display = "none";
       }
-      function denyHorsesGoBackToWagons(){
+      function backAfterDeny(){
         currentMode = "wagons";
         applyMode();
       }
 
-      accessClose.onclick = () => { hideAccessModal(); denyHorsesGoBackToWagons(); };
-      accessCancel.onclick = () => { hideAccessModal(); denyHorsesGoBackToWagons(); };
+      accessClose.onclick = () => { hideAccessModal(); backAfterDeny(); };
+      accessCancel.onclick = () => { hideAccessModal(); backAfterDeny(); };
 
       accessCode.addEventListener("keydown", (e) => {
         if (e.key === "Enter") accessSubmit.click();
@@ -1422,6 +1594,7 @@
         const res = await unlockWithCode(code);
         if (res.ok){
           hideAccessModal();
+          currentMode = "horses";
           applyMode();
           return;
         }
@@ -1439,9 +1612,20 @@
       accessModal.addEventListener("click", (e) => {
         if (e.target === accessModal){
           hideAccessModal();
-          denyHorsesGoBackToWagons();
+          backAfterDeny();
         }
       });
+
+      // ===== Mode switching (3 buttons) =====
+      const wagonsBtn = document.getElementById("wagonsBtn");
+      const horsesBtn = document.getElementById("horsesBtn");
+      const housesBtn = document.getElementById("housesBtn");
+
+      function setActiveBtn(){
+        wagonsBtn.classList.toggle("active", currentMode === "wagons");
+        horsesBtn.classList.toggle("active", currentMode === "horses");
+        housesBtn.classList.toggle("active", currentMode === "houses");
+      }
 
       async function applyMode(){
         map.closePopup();
@@ -1449,31 +1633,32 @@
         if (currentMode === "horses"){
           const ok = await hasHorseAccess();
           if (!ok){
-            showAccessModal();
+            showAccessModal("horses");
             return;
           }
         }
 
-        if (currentMode === "wagons"){
-          if (map.hasLayer(horsesLayer)) map.removeLayer(horsesLayer);
-          if (!map.hasLayer(wagonsLayer)) wagonsLayer.addTo(map);
-          toggleBtn.textContent = "🐎 Коники";
-        } else {
-          if (map.hasLayer(wagonsLayer)) map.removeLayer(wagonsLayer);
-          if (!map.hasLayer(horsesLayer)) horsesLayer.addTo(map);
-          toggleBtn.textContent = "🛒 Повозки";
-        }
+        // remove all, add active
+        if (map.hasLayer(wagonsLayer)) map.removeLayer(wagonsLayer);
+        if (map.hasLayer(horsesLayer)) map.removeLayer(horsesLayer);
+        if (map.hasLayer(housesLayer)) map.removeLayer(housesLayer);
 
-        renderDrawer();
+        if (currentMode === "wagons") wagonsLayer.addTo(map);
+        if (currentMode === "horses") horsesLayer.addTo(map);
+        if (currentMode === "houses") housesLayer.addTo(map);
+
+        setActiveBtn();
+        await renderDrawer();
       }
 
-      toggleBtn.onclick = async () => {
-        currentMode = (currentMode === "wagons") ? "horses" : "wagons";
-        await applyMode();
-      };
+      wagonsBtn.onclick = async () => { currentMode = "wagons"; await applyMode(); };
+      horsesBtn.onclick = async () => { currentMode = "horses"; await applyMode(); };
+      housesBtn.onclick = async () => { currentMode = "houses"; await applyMode(); };
 
+      // start
       applyMode();
 
+      // ===== coords click =====
       map.on('click', (e) => {
         if (!coordsEnabled) return;
         alert(`Координати:\nY(lat): ${Math.round(e.latlng.lat)}\nX(lng): ${Math.round(e.latlng.lng)}`);
