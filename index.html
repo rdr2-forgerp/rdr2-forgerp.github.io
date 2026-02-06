@@ -45,7 +45,7 @@
       mix-blend-mode: multiply;
     }
 
-    /* ===== TOP BAR (новий) ===== */
+    /* ===== TOP BAR ===== */
     .topBar{
       position: fixed;
       top: calc(10px + env(safe-area-inset-top));
@@ -68,7 +68,6 @@
     }
     .topModes .btn, .topList .btn{ pointer-events: auto; }
 
-    /* Ховаємо topBar, коли відкритий drawer (щоб не заважав огляду) */
     body.drawerOpen .topBar{ display: none; }
 
     .btn{
@@ -155,6 +154,13 @@
       overflow:hidden;
     }
     .pinIcon img{ width: 26px; height: 26px; display:block; }
+    /* ✅ ЕМОДЗІ ДЛЯ БУДИНКУ НА МАРКЕРІ */
+    .pinEmoji{
+      font-size: 22px;
+      line-height: 1;
+      transform: translateY(1px);
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,.25));
+    }
 
     .rdrCard{
       width: clamp(320px, 92vw, 560px);
@@ -418,7 +424,6 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* ===== Drawer Tabs (вкладки) ===== */
     .drawerTabs{
       padding: 8px 12px 10px;
       display:flex;
@@ -690,14 +695,12 @@
       <button class="drawerClose" id="drawerClose" type="button">×</button>
     </div>
 
-    <!-- ВКЛАДКИ РЕЖИМІВ -->
     <div class="drawerTabs" id="drawerTabs">
       <button class="tabBtn" id="tabWagons" type="button">🛒 Повозки</button>
       <button class="tabBtn" id="tabHorses" type="button">🐎 Коники</button>
       <button class="tabBtn" id="tabHouses" type="button">🏠 Будинки</button>
     </div>
 
-    <!-- СПИСОК -->
     <div class="drawerList" id="drawerList"></div>
   </aside>
 
@@ -761,7 +764,7 @@
     const MAP_URL   = basePath + "map.jpg"   + bust;
     const WAGON_URL = basePath + "wagon.png" + bust;
     const HORSE_URL = basePath + "horse.png" + bust;
-    const HOUSE_URL = basePath + "house.png" + bust; // поклади house.png поруч з index.html
+    const HOUSE_URL = basePath + "house.png" + bust; // якщо хочеш - може існувати, але для маркерів ми тепер юзаємо 🏠
 
     // ===== DATA (WAGONS) =====
     function cityById(id){
@@ -847,7 +850,7 @@
       49:"Циганський красень: м’яко котиться й тримає стиль.",
       50:"Слухняний і розумний: любить спокійний контроль.",
       51:"Міцний як домкрат: впевненість у кожному кроці.",
-      52:"Легкий на хід: комфортний без зайвих вибриків.",
+      52:"Легкий на хід: комфортний без зайвого.",
       53:"Грайливий, але керований: швидко звикає до вершника.",
       54:"Білий бос: вигляд люкс, характер залізний.",
       55:"Чорна блискавка: швидкість і різкість у чистому вигляді.",
@@ -943,31 +946,29 @@
     }));
 
     // ===== DATA (HOUSES) =====
-    // ФОТО: вигляд = houses/D1.jpg, площа = houses/D1-1.jpg
-const HOUSES_DATA = [
-  { id: 16, title: "Будинок", price: 9000,  photos: ["houses/D16.jpg", "houses/D16-1.jpg"] },
-  { id: 17, title: "Будинок", price: 25000, photos: ["houses/D17.jpg", "houses/D17-1.jpg"] },
-  { id: 21, title: "Будинок", price: 6000,  photos: ["houses/D21.jpg", "houses/D21-1.jpg"] },
-  { id: 22, title: "Будинок", price: 6000,  photos: ["houses/D22.jpg", "houses/D22-1.jpg"] },
-  { id: 30, title: "Будинок", price: 55000, photos: ["houses/D30.jpg", "houses/D30-1.jpg"] },
-  { id: 40, title: "Будинок", price: 6000,  photos: ["houses/D40.jpg", "houses/D40-1.jpg"] },
-  { id: 46, title: "Будинок", price: 4000,  photos: ["houses/D46.jpg", "houses/D46-1.jpg"] },
-  { id: 47, title: "Будинок", price: 4000,  photos: ["houses/D47.jpg", "houses/D47-1.jpg"] },
-  { id: 50, title: "Будинок", price: 4000,  photos: ["houses/D50.jpg", "houses/D50-1.jpg"] },
-];
+    const HOUSES_DATA = [
+      { id: 16, title: "Будинок", price: 9000,  photos: ["houses/D16.jpg", "houses/D16-1.jpg"] },
+      { id: 17, title: "Будинок", price: 25000, photos: ["houses/D17.jpg", "houses/D17-1.jpg"] },
+      { id: 21, title: "Будинок", price: 6000,  photos: ["houses/D21.jpg", "houses/D21-1.jpg"] },
+      { id: 22, title: "Будинок", price: 6000,  photos: ["houses/D22.jpg", "houses/D22-1.jpg"] },
+      { id: 30, title: "Будинок", price: 55000, photos: ["houses/D30.jpg", "houses/D30-1.jpg"] },
+      { id: 40, title: "Будинок", price: 6000,  photos: ["houses/D40.jpg", "houses/D40-1.jpg"] },
+      { id: 46, title: "Будинок", price: 4000,  photos: ["houses/D46.jpg", "houses/D46-1.jpg"] },
+      { id: 47, title: "Будинок", price: 4000,  photos: ["houses/D47.jpg", "houses/D47-1.jpg"] },
+      { id: 50, title: "Будинок", price: 4000,  photos: ["houses/D50.jpg", "houses/D50-1.jpg"] },
+    ];
 
-    // Координати маркерів будинків на карті (X, Y) — потім підставиш точні
-const HOUSE_GROUPS = [
-  { ids: [30], x: 1852, y: 793  },
-  { ids: [22], x: 1849, y: 862  },
-  { ids: [21], x: 1873, y: 946  },
-  { ids: [16], x: 1705, y: 958  },
-  { ids: [17], x: 1607, y: 1123 },
-  { ids: [50], x: 1916, y: 1167 },
-  { ids: [46], x: 1010,  y: 1447 },
-  { ids: [47], x: 1100, y: 1271 },
-  { ids: [40], x: 1115, y: 508  },
-];
+    const HOUSE_GROUPS = [
+      { ids: [30], x: 1852, y: 793  },
+      { ids: [22], x: 1849, y: 862  },
+      { ids: [21], x: 1873, y: 946  },
+      { ids: [16], x: 1705, y: 958  },
+      { ids: [17], x: 1607, y: 1123 },
+      { ids: [50], x: 1916, y: 1167 },
+      { ids: [46], x: 1010, y: 1447 },
+      { ids: [47], x: 1100, y: 1271 },
+      { ids: [40], x: 1115, y: 508  },
+    ];
 
     const HORSE_GROUPS = [
       { ids: [1,2,3,4,5,6],               x: 1965, y: 1183 },
@@ -1029,11 +1030,16 @@ const HOUSE_GROUPS = [
       return `#${min}-${max}`;
     }
 
-    function markerHtml(label, iconUrl){
+    /* ✅ ЗМІНЕНО: тепер markerHtml може показувати емодзі */
+    function markerHtml(label, iconUrl, emojiText = ""){
+      const inner = emojiText
+        ? `<span class="pinEmoji">${esc(emojiText)}</span>`
+        : `<img src="${iconUrl}" alt="">`;
+
       return `
         <div class="pinWrap">
           <div class="pinBadge">${label}</div>
-          <div class="pinIcon"><img src="${iconUrl}" alt=""></div>
+          <div class="pinIcon">${inner}</div>
         </div>
       `;
     }
@@ -1499,7 +1505,8 @@ const HOUSE_GROUPS = [
       HOUSE_GROUPS.forEach((g, idx) => {
         const icon = L.divIcon({
           className: "",
-          html: markerHtml(groupLabel(g.ids), HOUSE_URL, "🏠"),
+          /* ✅ ОТУТ: БУДИНОК МАРКЕР = ЕМОДЗІ 🏠 */
+          html: markerHtml(groupLabel(g.ids), "", "🏠"),
           iconSize: [44, 44],
           iconAnchor: [0, 0]
         });
@@ -1682,7 +1689,7 @@ const HOUSE_GROUPS = [
         }
       });
 
-      // ===== Mode switching (top buttons + drawer tabs) =====
+      // ===== Mode switching =====
       const wagonsBtn = document.getElementById("wagonsBtn");
       const horsesBtn = document.getElementById("horsesBtn");
       const housesBtn = document.getElementById("housesBtn");
@@ -1726,20 +1733,16 @@ const HOUSE_GROUPS = [
         await renderDrawer();
       }
 
-      // top
       wagonsBtn.onclick = async () => { currentMode = "wagons"; await applyMode(); };
       horsesBtn.onclick = async () => { currentMode = "horses"; await applyMode(); };
       housesBtn.onclick = async () => { currentMode = "houses"; await applyMode(); };
 
-      // drawer tabs
       tabWagons.onclick = async () => { currentMode = "wagons"; await applyMode(); };
       tabHorses.onclick = async () => { currentMode = "horses"; await applyMode(); };
       tabHouses.onclick = async () => { currentMode = "houses"; await applyMode(); };
 
-      // start
       applyMode();
 
-      // coords click
       map.on('click', (e) => {
         if (!coordsEnabled) return;
         alert(`Координати:\nY(lat): ${Math.round(e.latlng.lat)}\nX(lng): ${Math.round(e.latlng.lng)}`);
