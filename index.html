@@ -45,44 +45,32 @@
       mix-blend-mode: multiply;
     }
 
+    /* ===== TOP BAR (новий) ===== */
     .topBar{
       position: fixed;
       top: calc(10px + env(safe-area-inset-top));
       left: calc(10px + env(safe-area-inset-left));
       right: calc(10px + env(safe-area-inset-right));
       display: flex;
-      gap: 10px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
       z-index: 9999;
       pointer-events: none;
-      flex-wrap: wrap;
-      align-items: center;
+      flex-wrap: nowrap;
     }
-    /* === TOP BAR LAYOUT FIX === */
-.topBar{
-  justify-content: space-between;
-}
 
-.topLeft,
-.topCenter,
-.topRight{
-  display: flex;
-  gap: 8px;
-  pointer-events: none;
-}
+    .topModes, .topList{
+      display: flex;
+      gap: 8px;
+      pointer-events: none;
+      flex-wrap: wrap;
+    }
+    .topModes .btn, .topList .btn{ pointer-events: auto; }
 
-.topLeft .btn,
-.topCenter .btn,
-.topRight .btn{
-  pointer-events: auto;
-}
+    /* Ховаємо topBar, коли відкритий drawer (щоб не заважав огляду) */
+    body.drawerOpen .topBar{ display: none; }
 
-/* мобілка */
-@media (max-width: 520px){
-  .topCenter{
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-}
     .btn{
       pointer-events: auto;
       border: 1px solid rgba(255,255,255,.14);
@@ -107,7 +95,6 @@
       border-color: rgba(255,255,255,.22);
       color: var(--gold);
     }
-
     .btnSmall{ min-width: 118px; }
 
     @media (max-width: 420px){
@@ -117,16 +104,16 @@
         font-size: 14px;
         gap: 8px;
       }
-      .btnSmall{ min-width: 0; flex: 1; }
-      .topBar{ gap: 8px; }
+      .btnSmall{ min-width: 0; }
+      .topBar{ gap: 6px; }
     }
 
     .leaflet-top.leaflet-left {
-      top: calc(86px + env(safe-area-inset-top));
+      top: calc(96px + env(safe-area-inset-top));
       left: calc(10px + env(safe-area-inset-left));
     }
     @media (max-width: 420px){
-      .leaflet-top.leaflet-left { top: calc(94px + env(safe-area-inset-top)); }
+      .leaflet-top.leaflet-left { top: calc(108px + env(safe-area-inset-top)); }
     }
 
     .leaflet-popup-content-wrapper { background: transparent; box-shadow:none; padding:0 !important; }
@@ -387,6 +374,7 @@
       color: var(--gold);
     }
 
+    /* ===== Drawer ===== */
     .drawer{
       position: fixed;
       top: 0;
@@ -429,6 +417,33 @@
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
     }
+
+    /* ===== Drawer Tabs (вкладки) ===== */
+    .drawerTabs{
+      padding: 8px 12px 10px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .tabBtn{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-weight: 900;
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .15s ease, color .15s ease, transform .08s ease;
+    }
+    .tabBtn.active{
+      background: rgba(255,255,255,.18);
+      color: var(--gold);
+      border-color: rgba(255,255,255,.28);
+    }
+    .tabBtn:active{ transform: scale(.97); }
 
     .drawerList{
       overflow:auto;
@@ -529,6 +544,7 @@
       .pricePill{ font-size: 15px; padding: 9px 11px; }
     }
 
+    /* ===== FAB ===== */
     .fab{
       position: fixed;
       right: calc(12px + env(safe-area-inset-right));
@@ -542,7 +558,13 @@
       padding: 12px 14px;
       min-width: 0;
     }
+    .fabStack{
+      display:flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
+    /* ===== Access modal ===== */
     .accessModal{
       position: fixed;
       inset: 0;
@@ -661,42 +683,41 @@
 <body>
   <!-- LEFT DRAWER -->
   <div class="scrim" id="scrim"></div>
-<aside class="drawer" id="drawer" aria-hidden="true">
-  <div class="drawerHeader">
-    <div class="drawerTitle" id="drawerTitle">Список</div>
-    <button class="drawerClose" id="drawerClose" type="button">×</button>
-  </div>
 
-  <!-- ВКЛАДКИ РЕЖИМІВ -->
-  <div class="drawerTabs" id="drawerTabs">
-    <button class="tabBtn" id="tabWagons" type="button">🛒 Повозки</button>
-    <button class="tabBtn" id="tabHorses" type="button">🐎 Коники</button>
-    <button class="tabBtn" id="tabHouses" type="button">🏠 Будинки</button>
-  </div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawerHeader">
+      <div class="drawerTitle" id="drawerTitle">Список</div>
+      <button class="drawerClose" id="drawerClose" type="button">×</button>
+    </div>
 
-  <!-- СПИСОК -->
-  <div class="drawerList" id="drawerList"></div>
-</aside>
+    <!-- ВКЛАДКИ РЕЖИМІВ -->
+    <div class="drawerTabs" id="drawerTabs">
+      <button class="tabBtn" id="tabWagons" type="button">🛒 Повозки</button>
+      <button class="tabBtn" id="tabHorses" type="button">🐎 Коники</button>
+      <button class="tabBtn" id="tabHouses" type="button">🏠 Будинки</button>
+    </div>
+
+    <!-- СПИСОК -->
+    <div class="drawerList" id="drawerList"></div>
+  </aside>
 
   <!-- TOP BAR -->
-<!-- TOP BAR -->
-<div class="topBar">
-  <div class="topModes">
-    <button class="btn btnSmall" id="wagonsBtn">🛒 Повозки</button>
-    <button class="btn btnSmall" id="horsesBtn">🐎 Коники</button>
-    <button class="btn btnSmall" id="housesBtn">🏠 Будинки</button>
+  <div class="topBar">
+    <div class="topModes">
+      <button class="btn btnSmall" id="wagonsBtn" type="button">🛒 Повозки</button>
+      <button class="btn btnSmall" id="horsesBtn" type="button">🐎 Коники</button>
+      <button class="btn btnSmall" id="housesBtn" type="button">🏠 Будинки</button>
+    </div>
+    <div class="topList">
+      <button class="btn btnSmall" id="listBtn" type="button">☰ Список</button>
+    </div>
   </div>
 
-  <div class="topList">
-    <button class="btn btnSmall" id="listBtn">☰ Список</button>
+  <!-- FLOATING BUTTONS -->
+  <div class="fab fabStack">
+    <button class="btn" id="coordsBtn" type="button">📍 Вимк</button>
+    <button class="btn" id="reloadBtn" type="button">⟳ Оновити</button>
   </div>
-</div>
-
-  <!-- FLOATING COORDS BUTTON -->
-<div class="fab fabStack">
-  <button class="btn" id="coordsBtn">📍 Вимк</button>
-  <button class="btn" id="reloadBtn">⟳ Оновити</button>
-</div>
 
   <div id="map"></div>
 
@@ -728,7 +749,7 @@
 
   <script>
     // ===== CONFIG =====
-    const API_BASE = "https://shiny-mud-0b7d.yurromanow.workers.dev"; // твій worker
+    const API_BASE = "https://shiny-mud-0b7d.yurromanow.workers.dev";
     const TOKEN_KEY = "horsesToken";
 
     // ===== PATH (GitHub Pages safe) =====
@@ -740,7 +761,7 @@
     const MAP_URL   = basePath + "map.jpg"   + bust;
     const WAGON_URL = basePath + "wagon.png" + bust;
     const HORSE_URL = basePath + "horse.png" + bust;
-    const HOUSE_URL = basePath + "house.png" + bust; // <-- додай house.png поруч з index.html
+    const HOUSE_URL = basePath + "house.png" + bust; // поклади house.png поруч з index.html
 
     // ===== DATA (WAGONS) =====
     function cityById(id){
@@ -923,14 +944,13 @@
 
     // ===== DATA (HOUSES) =====
     // ФОТО: вигляд = houses/D1.jpg, площа = houses/D1-1.jpg
-    // Поки що тут приклади. Потім просто додаєш нові будинки у масив.
     const HOUSES_DATA = [
-      { id: 1, title: "Будинок", price: 10000, area: "—", photos: ["houses/D1.jpg", "houses/D1-1.jpg"] },
-      { id: 2, title: "Будинок", price: 15000, area: "—", photos: ["houses/D2.jpg", "houses/D2-1.jpg"] },
-      { id: 3, title: "Будинок", price: 12000, area: "—", photos: ["houses/D3.jpg", "houses/D3-1.jpg"] },
+      { id: 1, title: "Будинок", price: 10000, photos: ["houses/D1.jpg", "houses/D1-1.jpg"] },
+      { id: 2, title: "Будинок", price: 15000, photos: ["houses/D2.jpg", "houses/D2-1.jpg"] },
+      { id: 3, title: "Будинок", price: 12000, photos: ["houses/D3.jpg", "houses/D3-1.jpg"] },
     ];
 
-    // Координати маркерів будинків на карті (X, Y) — ти потім підставиш точні
+    // Координати маркерів будинків на карті (X, Y) — потім підставиш точні
     const HOUSE_GROUPS = [
       { ids: [1], x: 1621, y: 989  },
       { ids: [2], x: 1315, y: 1181 },
@@ -1104,7 +1124,6 @@
     }
 
     // ===== Cards: Houses =====
-    // Кнопки: "Вигляд" (D1.jpg) і "Площа" (D1-1.jpg)
     function houseCardHtml(d, photoIndex){
       const rawPhotos = (d.photos && d.photos.length) ? d.photos : ["house.png"];
       const photos = rawPhotos.map(resolveUrl).filter(Boolean);
@@ -1151,11 +1170,13 @@
       drawer.classList.add("open");
       scrim.classList.add("show");
       drawer.setAttribute("aria-hidden", "false");
+      document.body.classList.add("drawerOpen");
     }
     function closeDrawer(){
       drawer.classList.remove("open");
       scrim.classList.remove("show");
       drawer.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("drawerOpen");
     }
 
     document.getElementById("listBtn").onclick = openDrawer;
@@ -1526,7 +1547,7 @@
               `;
             }).join("");
 
-        } else { // houses
+        } else {
           drawerTitleEl.textContent = "Список будинків";
           drawerList.innerHTML = HOUSES_DATA
             .slice()
@@ -1539,7 +1560,7 @@
                     <img class="thumb" src="${thumb}" alt="D${d.id}" onerror="this.src='${HOUSE_URL}'">
                     <div class="wagonText">
                       <div class="wagonMain">#${d.id} — ${esc(d.title || "Будинок")}</div>
-                      <div class="wagonSub">${esc(d.area || "")}</div>
+                      <div class="wagonSub">Вигляд / Площа</div>
                     </div>
                   </div>
                   <div class="pricePill">${fmtPriceDot(d.price)} $</div>
@@ -1575,7 +1596,7 @@
               map.panTo([g.y, g.x], { animate: true, duration: 0.35 });
               setTimeout(() => openHorseGroupPopup(groupIndex, id, 0), 220);
 
-            } else { // house
+            } else {
               const groupIndex = groupByHouseId.get(id);
               if (groupIndex == null) return;
               const g = HOUSE_GROUPS[groupIndex];
@@ -1594,10 +1615,7 @@
       const accessCode   = document.getElementById("accessCode");
       const accessError  = document.getElementById("accessError");
 
-      let accessReturnMode = "wagons";
-
-      function showAccessModal(returnMode){
-        accessReturnMode = returnMode || "wagons";
+      function showAccessModal(){
         accessError.style.display = "none";
         accessCode.value = "";
         accessModal.style.display = "flex";
@@ -1652,15 +1670,24 @@
         }
       });
 
-      // ===== Mode switching (3 buttons) =====
+      // ===== Mode switching (top buttons + drawer tabs) =====
       const wagonsBtn = document.getElementById("wagonsBtn");
       const horsesBtn = document.getElementById("horsesBtn");
       const housesBtn = document.getElementById("housesBtn");
+
+      const tabWagons = document.getElementById("tabWagons");
+      const tabHorses = document.getElementById("tabHorses");
+      const tabHouses = document.getElementById("tabHouses");
 
       function setActiveBtn(){
         wagonsBtn.classList.toggle("active", currentMode === "wagons");
         horsesBtn.classList.toggle("active", currentMode === "horses");
         housesBtn.classList.toggle("active", currentMode === "houses");
+      }
+      function setActiveTabs(){
+        tabWagons.classList.toggle("active", currentMode === "wagons");
+        tabHorses.classList.toggle("active", currentMode === "horses");
+        tabHouses.classList.toggle("active", currentMode === "houses");
       }
 
       async function applyMode(){
@@ -1669,12 +1696,11 @@
         if (currentMode === "horses"){
           const ok = await hasHorseAccess();
           if (!ok){
-            showAccessModal("horses");
+            showAccessModal();
             return;
           }
         }
 
-        // remove all, add active
         if (map.hasLayer(wagonsLayer)) map.removeLayer(wagonsLayer);
         if (map.hasLayer(horsesLayer)) map.removeLayer(horsesLayer);
         if (map.hasLayer(housesLayer)) map.removeLayer(housesLayer);
@@ -1684,17 +1710,24 @@
         if (currentMode === "houses") housesLayer.addTo(map);
 
         setActiveBtn();
+        setActiveTabs();
         await renderDrawer();
       }
 
+      // top
       wagonsBtn.onclick = async () => { currentMode = "wagons"; await applyMode(); };
       horsesBtn.onclick = async () => { currentMode = "horses"; await applyMode(); };
       housesBtn.onclick = async () => { currentMode = "houses"; await applyMode(); };
 
+      // drawer tabs
+      tabWagons.onclick = async () => { currentMode = "wagons"; await applyMode(); };
+      tabHorses.onclick = async () => { currentMode = "horses"; await applyMode(); };
+      tabHouses.onclick = async () => { currentMode = "houses"; await applyMode(); };
+
       // start
       applyMode();
 
-      // ===== coords click =====
+      // coords click
       map.on('click', (e) => {
         if (!coordsEnabled) return;
         alert(`Координати:\nY(lat): ${Math.round(e.latlng.lat)}\nX(lng): ${Math.round(e.latlng.lng)}`);
