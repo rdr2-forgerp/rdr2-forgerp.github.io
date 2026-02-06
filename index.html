@@ -670,26 +670,24 @@
   </aside>
 
   <!-- TOP BAR -->
+<!-- TOP BAR -->
 <div class="topBar">
-  <div class="topLeft">
-    <button class="btn btnSmall" id="listBtn" type="button">☰ Список</button>
+  <div class="topModes">
+    <button class="btn btnSmall" id="wagonsBtn">🛒 Повозки</button>
+    <button class="btn btnSmall" id="horsesBtn">🐎 Коники</button>
+    <button class="btn btnSmall" id="housesBtn">🏠 Будинки</button>
   </div>
 
-  <div class="topCenter">
-    <button class="btn btnSmall" id="wagonsBtn" type="button">🛒 Повозки</button>
-    <button class="btn btnSmall" id="horsesBtn" type="button">🐎 Коники</button>
-    <button class="btn btnSmall" id="housesBtn" type="button">🏠 Будинки</button>
-  </div>
-
-  <div class="topRight">
-    <button class="btn btnSmall" id="reloadBtn" type="button">⟳ Оновити</button>
+  <div class="topList">
+    <button class="btn btnSmall" id="listBtn">☰ Список</button>
   </div>
 </div>
 
   <!-- FLOATING COORDS BUTTON -->
-  <div class="fab">
-    <button class="btn" id="coordsBtn" type="button">📍 Вимк</button>
-  </div>
+<div class="fab fabStack">
+  <button class="btn" id="coordsBtn">📍 Вимк</button>
+  <button class="btn" id="reloadBtn">⟳ Оновити</button>
+</div>
 
   <div id="map"></div>
 
